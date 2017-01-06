@@ -1,0 +1,27 @@
+<!DOCTYPE>
+<html>
+    <head>
+        <script src="Particle3DCompute.class.js"></script>
+        <script src="Flat3D.class.js"></script>
+    </head>
+    <body>
+        <canvas id="StageCanvas">Your Browser don't support canvas</canvas>
+    </body>
+    <script>
+        var a = {
+            hello: {
+                world: {
+                    me: {
+                        x: 11
+                    }
+                }
+            }
+        };
+        var c = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 135,45, 100);
+        var p = new Flat3D.Point(40,40,0);
+        console.log(Flat3D.Coordinate.point3DTo2D(p,c));
+        console.log(Flat3D.Coordinate.sphrToRect(90,0,1));
+        Flat3D.Value.setValue(a, "hello.world.me", 22);
+        console.log(a);
+    </script>
+</html>
