@@ -1,34 +1,34 @@
 /*Flat 3D Alpha 1.0 created by Jarvis 2017.01.03*/
 "use strict";
 var Flat3D = {
-    Config:{
-        TIMER_TICK:20,
+    Config: {
+        TIMER_TICK: 20,
     },
     Stage: function () {
         var stage = {
             things: [],
-            camera: new Flat3D.Camera(new Flat3D.Point(0, 0, 0), 0,90, 100),
+            camera: new Flat3D.Camera(new Flat3D.Point(0, 0, 0), 0, 90, 100),
             status: 2,
             tick: 0,
-            rect:undefined,
+            rect: undefined,
             tickSpeed: 1,
             centerPosition: new Flat3D.Point(0, 0, 0),
             canvas: undefined,
-            matrix:undefined,
-            updateDuration:16,//60 fps
-            _lastUpdate:0,
-            canvasOption:{
+            matrix: undefined,
+            updateDuration: 16,//60 fps
+            _lastUpdate: 0,
+            canvasOption: {
 
             },
             bindCanvas: function (canvasElement, width, height) {
                 canvasElement.width = width;
                 canvasElement.height = height;
-                this.rect=new Flat3D.Rect.createFromSizeCenter(0,0,width,height);
+                this.rect = new Flat3D.Rect.createFromSizeCenter(0, 0, width, height);
                 this.centerPosition = new Flat3D.Point(width / 2, height / 2, 0);
-                this.camera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 180,90, 100);
+                this.camera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 180, 90, 100);
                 this.canvas = canvasElement.getContext("2d");
-                this.canvas.translate(width / 2,height / 2);
-                this.matrix=new Flat3D.Matrix(width,height);
+                this.canvas.translate(width / 2, height / 2);
+                this.matrix = new Flat3D.Matrix(width, height);
             },
             setThing: function (thing) {
                 var newThings = [];
@@ -61,46 +61,46 @@ var Flat3D = {
                     this.things[a].destroy();
                 }
             },
-            updateStage:function(){
-                if(this.canvas){
-                    this.matrix=new Flat3D.Matrix(this.rect.width,this.rect.height);
-                    this.canvas.clearRect(this.rect.left,this.rect.top,this.rect.width,this.rect.height);
+            updateStage: function () {
+                if (this.canvas) {
+                    this.matrix = new Flat3D.Matrix(this.rect.width, this.rect.height);
+                    this.canvas.clearRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
                     for (var a = 0; a < this.things.length; a++) {
                         this.things[a].draw();
                     }
                 }
-                
-                console.log(stage.tick);
+
+                //console.log(stage.tick);
             },
-            setFPS:function(FPS){
-                this.updateDuration=1000/FPS;
+            setFPS: function (FPS) {
+                this.updateDuration = 1000 / FPS;
             }
         };
         stage.timer = setInterval(function () {
             if (stage.status == 1) {
-                stage.tick += stage.tickSpeed*Flat3D.Config.TIMER_TICK;
+                stage.tick += stage.tickSpeed * Flat3D.Config.TIMER_TICK;
             }
-            if(stage.tick-stage._lastUpdate>=stage.updateDuration){
-                stage._lastUpdate=stage.tick;
+            if (stage.tick - stage._lastUpdate >= stage.updateDuration) {
+                stage._lastUpdate = stage.tick;
                 stage.updateStage();
             }
         }, Flat3D.Config.TIMER_TICK);
         return stage;
     },
-    Matrix:function(width,height){
-        var data=[];
-        for(var a=0;a<width;a++){
-            data[a]=[];
+    Matrix: function (width, height) {
+        var data = [];
+        for (var a = 0; a < width; a++) {
+            data[a] = [];
         }
         return data;
     },
-    Camera: function (centerPoint, angleA,angleB, focus) {
+    Camera: function (centerPoint, angleA, angleB, focus) {
         return {
-            angleA:angleA,
-            angleB:angleB,
+            angleA: angleA,
+            angleB: angleB,
             position: centerPoint,
             focus: focus,
-            setAngle: function (_angleA,_angleB) {
+            setAngle: function (_angleA, _angleB) {
                 this.angleA = _angleA;
                 this.angleB = _angleB;
             },
@@ -117,6 +117,9 @@ var Flat3D = {
             x: x, y: y, z: z,
             to: function (target) {
                 return new Flat3D.Vector(target.x - this.x, target.y - this.y, target.z - this.z);
+            },
+            add: function (target) {
+                return new Flat3D.Point(target.x + this.x, target.y + this.y, target.z + this.z);
             }
         };
         return point;
@@ -131,14 +134,61 @@ var Flat3D = {
         create: function (left, top, right, bottom) {
             return {
                 left: left, top: top, right: right, bottom: bottom,
-                width:right-left,height:bottom-top,
+                width: right - left, height: bottom - top,
 
             };
         }
     },
-    ThingSet:function(stage,position){
-        var thingSet=new Flat3D.Thing(stage,position);
-        
+    Container: function (stage, position) {
+        var container = new Flat3D.Thing(stage, position);
+        container.texture = undefined;
+        container.things = [];
+        container.setThing = function (thing) {
+            thing.position.z=this.position.z;
+            thing.container=this;
+            var newThings = [];
+            for (var a = 0; a < this.things.length; a++) {
+                if (this.things[a]) {
+                    newThings.push(this.things[a]);
+                }
+            }
+            this.things = newThings;
+            this.things.push(thing);
+            return thing;
+        };
+        container.removeThing = function (thing) {
+            var id = this.things.indexOf(thing);
+            if (id > -1) {
+                this.things[id].destroy();
+                this.things[id] = undefined;
+            }
+        };
+        container.transform = {
+            translate: {
+                x: 0,
+                y: 0
+            },
+            scale: {
+                scaleWidth: 1,
+                scaleHeight: 1
+            },
+            rotate: {
+                center: {
+                    x: 0,
+                    y: 0
+                },
+                angle: 0
+            }
+        };
+        container.draw = function () {
+            for (var a = 0; a < this.things.length; a++) {
+                if (this.things[a]) {
+                    this.things[a].draw();
+                }
+            }
+        };
+
+        return container;
     },
     Thing: function (stage, position) {
         var thing = {
@@ -148,58 +198,113 @@ var Flat3D = {
             effectCallBack: function (fromThing) { },
             effectSet: [],
             animations: [],
-            texture:{
-                imgCanDraw:false,
-                img:undefined,
-                position:{
-                    x:0,
-                    y:0
+            texture: {
+                imgCanDraw: false,
+                img: undefined,
+                position: {
+                    x: 0,
+                    y: 0
                 },
-                translate:{
-                    x:0,
-                    y:0
-                },
-                scale:{
-                    scaleWidth:1,
-                    scaleHeight:1
-                },
-                rotate:{
-                    center:{
-                        x:0,
-                        y:0
+                transform: {
+                    translate: {
+                        x: 0,
+                        y: 0
                     },
-                    angle:0
-                }
-            },
-            draw:function(){
-                if(this.texture.img && this.texture.imgCanDraw && this.stage.canvas){
-                    var canvas = this.stage.canvas;
-                    var cTrans=Flat3D.Coordinate.point3DTo2D(this.position,this.stage.camera);
-                    var x=cTrans.position2D.x+this.texture.position.x-this.texture.rotate.center.x+this.texture.translate.x;
-                    var y=-cTrans.position2D.y+this.texture.position.y-this.texture.rotate.center.y+this.texture.translate.y;
-                    canvas.scale(this.texture.scale.scaleWidth,this.texture.scale.scaleHeight);
-                    canvas.translate(this.texture.rotate.center.x,this.texture.rotate.center.y);
-                    canvas.rotate(this.texture.rotate.angle*Flat3D.Coordinate.PId180);
-                    canvas.drawImage(this.texture.img,x,y);
-                    canvas.rotate(-this.texture.rotate.angle*Flat3D.Coordinate.PId180);
-                    canvas.translate(-this.texture.rotate.center.x,-this.texture.rotate.center.y);
-                    canvas.scale(1/this.texture.scale.scaleWidth,1/this.texture.scale.scaleHeight);
-                }
-            },
-            setTexture:function(url,moveToCenter){
-                var thing=this;
-                var img=new Image();
-                img.src=url;
-                img.onload=function(){
-                    thing.texture.imgCanDraw=true;
-                    if(moveToCenter){
-                        thing.texture.translate={
-                            x:-this.width/2,
-                            y:-this.height/2,
-                        }
+                    scale: {
+                        scaleWidth: 1,
+                        scaleHeight: 1
+                    },
+                    rotate: {
+                        center: {
+                            x: 0,
+                            y: 0
+                        },
+                        angle: 0
                     }
                 }
-                this.texture.img=img;
+            },
+            draw: function () {
+                var trans = {
+                    translate: {
+                        x: 0,
+                        y: 0
+                    },
+                    scale: {
+                        scaleWidth: 1,
+                        scaleHeight: 1
+                    },
+                    rotate: {
+                        center: {
+                            x: 0,
+                            y: 0
+                        },
+                        angle: 0
+                    }
+                };
+                if (this.texture.img && this.texture.imgCanDraw && this.stage.canvas) {
+                    var canvas = this.stage.canvas;
+                    var position;
+                    if (this.container) {
+                        position = this.position;
+                        position.z=this.container.position.z;
+                        trans = this.container.transform;
+                    }
+                    else {
+                        position = this.position;
+                    }
+                    var cTrans = Flat3D.Coordinate.point3DTo2D(position, this.stage.camera);
+                    var x = cTrans.position2D.x + this.texture.transform.translate.x;
+                    var y = -cTrans.position2D.y + this.texture.transform.translate.y;
+                    var dx=0;
+                    var dy=0;
+                    var rotate = {
+                        x: this.texture.position.x + this.texture.transform.rotate.center.x,
+                        y: this.texture.position.y + this.texture.transform.rotate.center.y,
+                        angle: this.texture.transform.rotate.angle + trans.rotate.angle,
+                    }
+                    if(this.container){
+                        var cTransR = Flat3D.Coordinate.point3DTo2D(this.container.position.add({x:this.container.transform.rotate.center.x,y:this.container.transform.rotate.center.y,z:0}), this.stage.camera);
+                        var d1=rotate.x-cTransR.position2D.x;
+                        var d2=rotate.y+cTransR.position2D.y;
+                        var d=Math.pow(Math.pow(d1,2)+Math.pow(d2,2),0.5);
+                        var tan=-d2/d1;
+                        var atan=90;
+                        if(d1<0)atan+=180;
+                        var an=(trans.rotate.angle+atan)*Flat3D.Coordinate.PId180-Math.atan(tan);
+                        dx=d*Math.sin(an);
+                        dy=-d*Math.cos(an);
+                        rotate.x=cTransR.position2D.x+dx;
+                        rotate.y=-cTransR.position2D.y+dy;
+                    }
+                    var scale = {
+                        scaleWidth: this.texture.transform.scale.scaleWidth * trans.scale.scaleWidth,
+                        scaleHeight: this.texture.transform.scale.scaleHeight * trans.scale.scaleHeight,
+                    };
+                    canvas.translate(rotate.x, rotate.y);
+                    canvas.scale(scale.scaleWidth, scale.scaleHeight);
+                    canvas.rotate(rotate.angle * Flat3D.Coordinate.PId180);
+                    canvas.drawImage(this.texture.img, x, y);
+                    canvas.rotate(-rotate.angle * Flat3D.Coordinate.PId180);
+                    canvas.scale(1 / scale.scaleWidth, 1 / scale.scaleHeight);
+                    canvas.translate(-rotate.x, -rotate.y);
+                }
+            },
+            setTexture: function (url, moveToCenter,loadComplete) {
+                var thing = this;
+                var img = new Image();
+                img.src = url;
+                thing.texture.imgCanDraw = false;
+                img.onload = function () {
+                    thing.texture.imgCanDraw = true;
+                    if (moveToCenter) {
+                        thing.texture.transform.translate = {
+                            x: -this.width / 2,
+                            y: -this.height / 2,
+                        }
+                    }
+                    if(loadComplete)loadComplete(thing,this);
+                }
+                this.texture.img = img;
                 return this.texture.img;
             },
             notifyEffectSet: function () {
@@ -208,8 +313,8 @@ var Flat3D = {
                     if (this.effectSet[a] && this.effectSet[a].effectCallBack) this.effectSet[a].effectCallBack(this);
                 }
             },
-            setFrameAnimationByParamKey: function (paramKey, start, end, valueEaseFunc, dtime, completedCallBack) {
-                var ani = new Flat3D.Animation.FrameByParamKey(this, paramKey, start, end, valueEaseFunc, dtime, completedCallBack);
+            setFrameAnimationByParamKey: function (paramKey, start, end, valueEase, dtime, completedCallBack) {
+                var ani = new Flat3D.Animation.FrameByParamKey(this, paramKey, start, end, valueEase, dtime, completedCallBack);
                 return this.setAnimation(ani);
             },
             setFrameAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack) {
@@ -246,46 +351,47 @@ var Flat3D = {
         };
         return thing;
     },
-    Coordinate:{
-        PId180:Math.PI/180,
-        point3DTo2D:function(point,camera){
+    Coordinate: {
+        PId180: Math.PI / 180,
+        point3DTo2D: function (point, camera) {
             var temp;
             var temp_position = new Array(3);
             var k = 0;
             var twDimsPos = {};
-            var CeyeVector=function (eyeView) {//返回视角向量[x轴,y轴,z轴]
+            var CeyeVector = function (eyeView) {//返回视角向量[x轴,y轴,z轴]
                 var r = 1, a, b, eyeVector = new Array(3);
-                a = 180+eyeView[0];
-                b = 180-eyeView[1];
+                a = 180 + eyeView[0];
+                b = 180 - eyeView[1];
                 eyeVector[2] = Flat3D.Coordinate.sphrToRect(a, b, r);
                 a = 270 + eyeView[0];
                 b = 90;
                 eyeVector[0] = Flat3D.Coordinate.sphrToRect(a, b, r);
                 a = 180 + eyeView[0];
-                b = 90-eyeView[1];
+                b = 90 - eyeView[1];
                 eyeVector[1] = Flat3D.Coordinate.sphrToRect(a, b, r);
                 return eyeVector;
             };
-            var eyeVector = CeyeVector([camera.angleA,camera.angleB]);
-            temp=camera.position.to(point);
+            var eyeVector = CeyeVector([camera.angleA, camera.angleB]);
+            temp = camera.position.to(point);
             temp_position[0] = temp.x * eyeVector[0].x + temp.y * eyeVector[0].y + temp.z * eyeVector[0].z;
             temp_position[1] = temp.x * eyeVector[1].x + temp.y * eyeVector[1].y + temp.z * eyeVector[1].z;
             temp_position[2] = temp.x * eyeVector[2].x + temp.y * eyeVector[2].y + temp.z * eyeVector[2].z;
             twDimsPos.position2D = {};
             k = -camera.focus / temp_position[2];
-            twDimsPos.position2D.x = k * k * temp_position[0];
-            twDimsPos.position2D.y = -k * k * temp_position[1];
+            var k2=Math.pow(k,2);
+            twDimsPos.position2D.x = k2 * temp_position[0];
+            twDimsPos.position2D.y = k2 * temp_position[1];
             twDimsPos.deep = temp_position[2];
             twDimsPos.k = k;
             return twDimsPos;
         },
-        sphrToRect:function(angleA, angleB, r){
-            var radA=angleA * Flat3D.Coordinate.PId180;
-            var radB=angleB * Flat3D.Coordinate.PId180;
+        sphrToRect: function (angleA, angleB, r) {
+            var radA = angleA * Flat3D.Coordinate.PId180;
+            var radB = angleB * Flat3D.Coordinate.PId180;
             var a = r * Math.sin(radB) * Math.cos(radA);
             var b = r * Math.sin(radB) * Math.sin(radA);
             var c = r * Math.cos(radB);
-            return new Flat3D.Vector(b,c,a);
+            return new Flat3D.Vector(b, c, a);
         }
     },
     Value: {
@@ -316,13 +422,13 @@ var Flat3D = {
                 value = newValue;
             }
         },
-        getCanvasColor:function(canvas,x,y){
-            var data=canvas.getImageData(x,y);
-            var color={
-                red:data.data[0],
-                green:data.data[1],
-                blue:data.data[2],
-                alpha:data.data[3],
+        getCanvasColor: function (canvas, x, y) {
+            var data = canvas.getImageData(x, y);
+            var color = {
+                red: data.data[0],
+                green: data.data[1],
+                blue: data.data[2],
+                alpha: data.data[3],
             };
             return color;
         }
@@ -360,22 +466,25 @@ var Flat3D = {
             };
             ani.timer = setInterval(function () {
                 if (ani.status == 1 && ani.thing.stage.status == 1) {
-                    if (ani.tick > ani.finalTick) {
+                    if (ani.tick >= ani.finalTick) {
                         if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                         ani.stop();
                     }
-                    ani.tick += ani.thing.stage.tickSpeed*Flat3D.Config.TIMER_TICK;
-                    var keys = Object.keys(ani.effectParams);
-                    for (var a = 0; a < keys.length; a++) {
-                        var value = Flat3D.Value.getValue(ani.thing, keys[a]);
-                        value = ani.effectParams[keys[a]](value);
-                        Flat3D.Value.setValue(ani.thing, keys[a], value)
+                    else{
+                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK;
+                        if (ani.tick > ani.finalTick)ani.tick=ani.finalTick;
+                        var keys = Object.keys(ani.effectParams);
+                        for (var a = 0; a < keys.length; a++) {
+                            var value = Flat3D.Value.getValue(ani.thing, keys[a]);
+                            value = ani.effectParams[keys[a]](value);
+                            Flat3D.Value.setValue(ani.thing, keys[a], value);
+                        }
                     }
                 }
             }, Flat3D.Config.TIMER_TICK);
             return ani;
         },
-        FrameByParamKey: function (target, paramKey, startValue, endValue, valueEaseFunc, dtime, _completedCallBack) {
+        FrameByParamKey: function (target, paramKey, startValue, endValue, valueEase, dtime, _completedCallBack) {
             var ani = {
                 status: 2,
                 finalTick: dtime,
@@ -384,7 +493,7 @@ var Flat3D = {
                 thing: target,
                 completedCallBack: _completedCallBack,
                 effectParamKey: paramKey,
-                easeFunc: valueEaseFunc,
+                Ease: valueEase,
                 start: function () {
                     this._ease.d = this._ease.end - this._ease.start;
                     this.status = 1;
@@ -412,19 +521,22 @@ var Flat3D = {
             };
             ani.timer = setInterval(function () {
                 if (ani.status == 1 && ani.thing.stage.status == 1) {
-                    if (ani.tick > ani.finalTick) {
+                    if (ani.tick >= ani.finalTick) {
                         if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                         ani.stop();
                     }
-                    ani.tick += ani.thing.stage.tickSpeed*Flat3D.Config.TIMER_TICK;
-                    var value = Flat3D.Value.getValue(ani.thing, ani.effectParamKey);
-                    if (ani.easeFunc) {
-                        value = ani.easeFunc(ani.tick, ani._ease.start, ani._ease.d, ani.finalTick);
-                        if ((value - ani._ease.end) * ani._ease.vd > 0) {
-                            value = ani._ease.end;
-                            ani.stop();
+                    else{
+                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK;
+                        if (ani.tick > ani.finalTick)ani.tick = ani.finalTick;
+                        var value = Flat3D.Value.getValue(ani.thing, ani.effectParamKey);
+                        if (ani.Ease) {
+                            value = ani.Ease(ani.tick, ani._ease.start, ani._ease.d, ani.finalTick);
+                            if ((value - ani._ease.end) * ani._ease.vd > 0) {
+                                value = ani._ease.end;
+                                ani.stop();
+                            }
+                            Flat3D.Value.setValue(ani.thing, ani.effectParamKey, value);
                         }
-                        Flat3D.Value.setValue(ani.thing, ani.effectParamKey, value);
                     }
                 }
             }, Flat3D.Config.TIMER_TICK);
@@ -465,7 +577,7 @@ var Flat3D = {
         c--- change in value（变化量）；
         d--- duration（持续时间）
      */
-    EaseFunc: {
+    Ease: {
         Linear: function (t, b, c, d) { return c * t / d + b; },
         Quad: {
             easeIn: function (t, b, c, d) {
@@ -590,7 +702,7 @@ var Flat3D = {
         },
         Bounce: {
             easeIn: function (t, b, c, d) {
-                return c - Flat3D.EaseFunc.Bounce.easeOut(d - t, 0, c, d) + b;
+                return c - Flat3D.Ease.Bounce.easeOut(d - t, 0, c, d) + b;
             },
             easeOut: function (t, b, c, d) {
                 if ((t /= d) < (1 / 2.75)) {
@@ -604,8 +716,8 @@ var Flat3D = {
                 }
             },
             easeInOut: function (t, b, c, d) {
-                if (t < d / 2) return Flat3D.EaseFunc.Bounce.easeIn(t * 2, 0, c, d) * .5 + b;
-                else return Flat3D.EaseFunc.Bounce.easeOut(t * 2 - d, 0, c, d) * .5 + c * .5 + b;
+                if (t < d / 2) return Flat3D.Ease.Bounce.easeIn(t * 2, 0, c, d) * .5 + b;
+                else return Flat3D.Ease.Bounce.easeOut(t * 2 - d, 0, c, d) * .5 + c * .5 + b;
             }
         }
     }

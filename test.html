@@ -22,9 +22,18 @@
         var ele=document.getElementById("StageCanvas");
         var stage=new Flat3D.Stage();
         stage.bindCanvas(ele,501,500);
+        var container=new Flat3D.Container(stage,new Flat3D.Point(0,0,0));
         var thing=new Flat3D.Thing(stage,new Flat3D.Point(0,0,0));
-        stage.setThing(thing);
+        var thing2=new Flat3D.Thing(stage,new Flat3D.Point(0,0,0));
+        stage.setThing(container);
+        container.setThing(thing);
+        container.setThing(thing2);
+        container.transform.rotate.center={x:0,y:0};
         thing.setTexture("./logo.png",true);
+        thing2.setTexture("./logo.png",true,function(_thing){
+            _thing.texture.transform.translate.x+=100;
+        });
+        
         console.log(stage);
         stage.setFPS(30);
         stage.start();
@@ -32,15 +41,29 @@
             "texture.position.x",
             0,
             200,
-            Flat3D.EaseFunc.Linear,
-            10000
+            Flat3D.Ease.Linear,
+            2000
         ).start();
-        thing.setFrameAnimationByParamKey(
-            "texture.position.y",
+        thing2.setFrameAnimationByParamKey(
+            "texture.position.x",
             0,
             200,
-            Flat3D.EaseFunc.Linear,
-            10000
+            Flat3D.Ease.Linear,
+            2000
+        ).start();
+        thing.setFrameAnimationByParamKey(
+            "texture.transform.rotate.angle",
+            0,
+            360,
+            Flat3D.Ease.Linear,
+            2000
+        );//.start();
+        container.setFrameAnimationByParamKey(
+            "transform.rotate.angle",
+            0,
+            360,
+            Flat3D.Ease.Linear,
+            2000
         ).start();
         //stage.stageCamera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 135,45, 100);
         //var p = new Flat3D.Point(40,40,0);
