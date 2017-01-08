@@ -1,60 +1,98 @@
 /*Flat 3D Alpha 1.0 created by Jarvis 2017.01.03*/
 "use strict";
 var Flat3D = {
+    Config:{
+        TIMER_TICK:20,
+    },
     Stage: function () {
         var stage = {
-            stageThings: [],
-            stageCamera: new Flat3D.Camera(new Flat3D.Point(0, 0, 0), 0,90, 100),
-            stageTickStatus: 2,
-            stageTick: 0,
-            stageTickSpeed: 1,
-            stageCenter: new Flat3D.Point(0, 0, 0),
-            stageCanvas: undefined,
+            things: [],
+            camera: new Flat3D.Camera(new Flat3D.Point(0, 0, 0), 0,90, 100),
+            status: 2,
+            tick: 0,
+            rect:undefined,
+            tickSpeed: 1,
+            centerPosition: new Flat3D.Point(0, 0, 0),
+            canvas: undefined,
+            matrix:undefined,
+            updateDuration:16,//60 fps
+            _lastUpdate:0,
+            canvasOption:{
+
+            },
             bindCanvas: function (canvasElement, width, height) {
                 canvasElement.width = width;
                 canvasElement.height = height;
-                this.stageCenter = new Flat3D.Point(width / 2, height / 2, 0);
-                this.stageCamera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 0,90, 100);
-                this.stageCanvas = canvasElement.getContext("2d");
+                this.rect=new Flat3D.Rect.createFromSizeCenter(0,0,width,height);
+                this.centerPosition = new Flat3D.Point(width / 2, height / 2, 0);
+                this.camera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 180,90, 100);
+                this.canvas = canvasElement.getContext("2d");
+                this.canvas.translate(width / 2,height / 2);
+                this.matrix=new Flat3D.Matrix(width,height);
             },
             setThing: function (thing) {
                 var newThings = [];
-                for (var a = 0; a < this.stageThings.length; a++) {
-                    if (this.stageThings[a]) {
-                        newThings.push(this.stageThings[a]);
+                for (var a = 0; a < this.things.length; a++) {
+                    if (this.things[a]) {
+                        newThings.push(this.things[a]);
                     }
                 }
-                this.stageThings = newThings;
-                this.stageThings.push(thing);
+                this.things = newThings;
+                this.things.push(thing);
                 return thing;
             },
             removeThing: function (thing) {
-                var id = this.stageThings.indexOf(thing);
+                var id = this.things.indexOf(thing);
                 if (id > -1) {
-                    this.stageThings[id].destroy();
-                    this.stageThings[id] = undefined;
+                    this.things[id].destroy();
+                    this.things[id] = undefined;
                 }
             },
             start: function () {
-                this.stageTickStatus = 1;
+                this.status = 1;
             },
             pause: function () {
-                this.stageTickStatus = 0;
+                this.status = 0;
             },
             destroy: function () {
-                this.stageTickStatus = 2;
+                this.status = 2;
                 if (this.timer) clearInterval(this.timer);
-                for (var a = 0; a < this.stageThings.length; a++) {
-                    this.stageThings[a].destroy();
+                for (var a = 0; a < this.things.length; a++) {
+                    this.things[a].destroy();
                 }
             },
+            updateStage:function(){
+                if(this.canvas){
+                    this.matrix=new Flat3D.Matrix(this.rect.width,this.rect.height);
+                    this.canvas.clearRect(this.rect.left,this.rect.top,this.rect.width,this.rect.height);
+                    for (var a = 0; a < this.things.length; a++) {
+                        this.things[a].draw();
+                    }
+                }
+                
+                console.log(stage.tick);
+            },
+            setFPS:function(FPS){
+                this.updateDuration=1000/FPS;
+            }
         };
         stage.timer = setInterval(function () {
             if (stage.status == 1) {
-                stage.stageTick += stage.stageTickSpeed;
+                stage.tick += stage.tickSpeed*Flat3D.Config.TIMER_TICK;
             }
-        }, 1);
+            if(stage.tick-stage._lastUpdate>=stage.updateDuration){
+                stage._lastUpdate=stage.tick;
+                stage.updateStage();
+            }
+        }, Flat3D.Config.TIMER_TICK);
         return stage;
+    },
+    Matrix:function(width,height){
+        var data=[];
+        for(var a=0;a<width;a++){
+            data[a]=[];
+        }
+        return data;
     },
     Camera: function (centerPoint, angleA,angleB, focus) {
         return {
@@ -93,18 +131,77 @@ var Flat3D = {
         create: function (left, top, right, bottom) {
             return {
                 left: left, top: top, right: right, bottom: bottom,
+                width:right-left,height:bottom-top,
 
             };
         }
     },
-    Thing: function (stage, position, rect) {
+    ThingSet:function(stage,position){
+        var thingSet=new Flat3D.Thing(stage,position);
+        
+    },
+    Thing: function (stage, position) {
         var thing = {
             stage: stage,
-            canvasRect: rect,
+            canvasRect: undefined,
             position: position,
             effectCallBack: function (fromThing) { },
             effectSet: [],
             animations: [],
+            texture:{
+                imgCanDraw:false,
+                img:undefined,
+                position:{
+                    x:0,
+                    y:0
+                },
+                translate:{
+                    x:0,
+                    y:0
+                },
+                scale:{
+                    scaleWidth:1,
+                    scaleHeight:1
+                },
+                rotate:{
+                    center:{
+                        x:0,
+                        y:0
+                    },
+                    angle:0
+                }
+            },
+            draw:function(){
+                if(this.texture.img && this.texture.imgCanDraw && this.stage.canvas){
+                    var canvas = this.stage.canvas;
+                    var cTrans=Flat3D.Coordinate.point3DTo2D(this.position,this.stage.camera);
+                    var x=cTrans.position2D.x+this.texture.position.x-this.texture.rotate.center.x+this.texture.translate.x;
+                    var y=-cTrans.position2D.y+this.texture.position.y-this.texture.rotate.center.y+this.texture.translate.y;
+                    canvas.scale(this.texture.scale.scaleWidth,this.texture.scale.scaleHeight);
+                    canvas.translate(this.texture.rotate.center.x,this.texture.rotate.center.y);
+                    canvas.rotate(this.texture.rotate.angle*Flat3D.Coordinate.PId180);
+                    canvas.drawImage(this.texture.img,x,y);
+                    canvas.rotate(-this.texture.rotate.angle*Flat3D.Coordinate.PId180);
+                    canvas.translate(-this.texture.rotate.center.x,-this.texture.rotate.center.y);
+                    canvas.scale(1/this.texture.scale.scaleWidth,1/this.texture.scale.scaleHeight);
+                }
+            },
+            setTexture:function(url,moveToCenter){
+                var thing=this;
+                var img=new Image();
+                img.src=url;
+                img.onload=function(){
+                    thing.texture.imgCanDraw=true;
+                    if(moveToCenter){
+                        thing.texture.translate={
+                            x:-this.width/2,
+                            y:-this.height/2,
+                        }
+                    }
+                }
+                this.texture.img=img;
+                return this.texture.img;
+            },
             notifyEffectSet: function () {
                 var n = this.effectSet.length;
                 for (var a = 0; a < n; a++) {
@@ -112,11 +209,11 @@ var Flat3D = {
                 }
             },
             setFrameAnimationByParamKey: function (paramKey, start, end, valueEaseFunc, dtime, completedCallBack) {
-                var ani = new Flat3D.Animation.FrameParamKey(this, paramKey, start, end, valueEaseFunc, dtime, completedCallBack);
+                var ani = new Flat3D.Animation.FrameByParamKey(this, paramKey, start, end, valueEaseFunc, dtime, completedCallBack);
                 return this.setAnimation(ani);
             },
             setFrameAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack) {
-                var ani = new Flat3D.Animation.FrameParamsFunc(this, paramsFunc, dtime, completedCallBack);
+                var ani = new Flat3D.Animation.FrameByParamsFunc(this, paramsFunc, dtime, completedCallBack);
                 return this.setAnimation(ani);
             },
             /*setForceAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack) {
@@ -147,7 +244,7 @@ var Flat3D = {
                 }
             }
         };
-        return this;
+        return thing;
     },
     Coordinate:{
         PId180:Math.PI/180,
@@ -219,9 +316,19 @@ var Flat3D = {
                 value = newValue;
             }
         },
+        getCanvasColor:function(canvas,x,y){
+            var data=canvas.getImageData(x,y);
+            var color={
+                red:data.data[0],
+                green:data.data[1],
+                blue:data.data[2],
+                alpha:data.data[3],
+            };
+            return color;
+        }
     },
     Animation: {
-        FrameParamsFunc: function (target, paramsFunc, dtime, _completedCallBack) {
+        FrameByParamsFunc: function (target, paramsFunc, dtime, _completedCallBack) {
             var ani = {
                 status: 2,
                 finalTick: dtime,
@@ -252,12 +359,12 @@ var Flat3D = {
                 }
             };
             ani.timer = setInterval(function () {
-                if (ani.status == 1 && ani.thing.stage.stageTickStatus == 1) {
+                if (ani.status == 1 && ani.thing.stage.status == 1) {
                     if (ani.tick > ani.finalTick) {
                         if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                         ani.stop();
                     }
-                    ani.tick += ani.thing.stage.stageTickSpeed;
+                    ani.tick += ani.thing.stage.tickSpeed*Flat3D.Config.TIMER_TICK;
                     var keys = Object.keys(ani.effectParams);
                     for (var a = 0; a < keys.length; a++) {
                         var value = Flat3D.Value.getValue(ani.thing, keys[a]);
@@ -265,10 +372,10 @@ var Flat3D = {
                         Flat3D.Value.setValue(ani.thing, keys[a], value)
                     }
                 }
-            }, 1);
+            }, Flat3D.Config.TIMER_TICK);
             return ani;
         },
-        FrameParamKey: function (target, paramKey, startValue, endValue, valueEaseFunc, dtime, _completedCallBack) {
+        FrameByParamKey: function (target, paramKey, startValue, endValue, valueEaseFunc, dtime, _completedCallBack) {
             var ani = {
                 status: 2,
                 finalTick: dtime,
@@ -304,12 +411,12 @@ var Flat3D = {
                 }
             };
             ani.timer = setInterval(function () {
-                if (ani.status == 1 && ani.thing.stage.stageTickStatus == 1) {
+                if (ani.status == 1 && ani.thing.stage.status == 1) {
                     if (ani.tick > ani.finalTick) {
                         if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                         ani.stop();
                     }
-                    ani.tick += ani.thing.stage.stageTickSpeed;
+                    ani.tick += ani.thing.stage.tickSpeed*Flat3D.Config.TIMER_TICK;
                     var value = Flat3D.Value.getValue(ani.thing, ani.effectParamKey);
                     if (ani.easeFunc) {
                         value = ani.easeFunc(ani.tick, ani._ease.start, ani._ease.d, ani.finalTick);
@@ -318,10 +425,9 @@ var Flat3D = {
                             ani.stop();
                         }
                         Flat3D.Value.setValue(ani.thing, ani.effectParamKey, value);
-                        console.log(value);
                     }
                 }
-            }, 1);
+            }, Flat3D.Config.TIMER_TICK);
             return ani;
         }
     },
