@@ -14,8 +14,8 @@ var Flat3D = {
             tickSpeed: 1,
             centerPosition: new Flat3D.Point(0, 0, 0),
             canvas: undefined,
+            canvasBuffer:undefined,
             matrix: undefined,
-            colorData:undefined,
             updateDuration: 16,//60 fps
             _lastUpdate: 0,
             canvasOption: {
@@ -24,6 +24,10 @@ var Flat3D = {
             bindCanvas: function (canvasElement, width, height) {
                 canvasElement.width = width;
                 canvasElement.height = height;
+                var buffer= document.createElement("canvas");
+                buffer.width=width;
+                buffer.height=height;
+                this.canvasBuffer=buffer.getContext("2d");
                 canvasElement.addEventListener("click",function(e){
                     stage.updateMatrix();
                     if(stage.matrix[e.offsetX][e.offsetY] && stage.matrix[e.offsetX][e.offsetY].belong){
@@ -36,6 +40,7 @@ var Flat3D = {
                 this.canvas = canvasElement.getContext("2d");
                 //console.log(this.rect);
                 this.canvas.translate(-this.rect.left, -this.rect.top);
+                this.canvasBuffer.translate(-this.rect.left, -this.rect.top);
                 this.updateStage();
             },
             setThing: function (thing) {
@@ -72,13 +77,12 @@ var Flat3D = {
             updateStage: function () {
                 if (this.canvas) {
                     this.canvas.clearRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
-                    this.canvas.beginPath();
-                    this.canvas.arc(0, 0, 2, 0, Math.PI * 2);
-                    this.canvas.fillStyle = "black";
-                    this.canvas.fill();
                     for (var a = 0; a < this.things.length; a++) {
                         this.things[a].draw();
                     }
+                    //var bufferData=this.canvasBuffer.getImageData(0,0,this.rect.width,this.rect.height)
+                    //this.canvas.putImageData(bufferData,0,0);
+                    //bufferData=null;
                 }
 
                 //console.log(stage.tick);
@@ -86,11 +90,9 @@ var Flat3D = {
             updateMatrix: function () {
                 if (this.canvas) {
                     this.matrix = new Flat3D.Matrix(this.rect.width, this.rect.height);
-                    this.colorData=this.canvas.getImageData(0,0,this.rect.width, this.rect.height);
                     for (var a = 0; a < this.things.length; a++) {
                         this.things[a].updateMatrix();
                     }
-                    console.log("matrix end");
                 }
             },
             setFPS: function (FPS) {
@@ -268,7 +270,7 @@ var Flat3D = {
                     }
                 }
             },
-            draw: function () {
+            draw: function (getArea) {
                 var trans = {
                     translate: {
                         x: 0,
@@ -288,6 +290,9 @@ var Flat3D = {
                 };
                 if (this.texture.img && this.texture.imgCanDraw && this.stage.canvas) {
                     var canvas = this.stage.canvas;
+                    if(getArea){
+                        canvas=this.stage.canvasBuffer;
+                    }
                     if (this.container) {
                         trans = this.container.transform;
                     }
@@ -400,32 +405,35 @@ var Flat3D = {
             },
             updateMatrix:function(){
                 //更新区域矩阵
+                if(!this.stage.canvasBuffer)return;
+                this.stage.canvasBuffer.clearRect(this.stage.rect.left, this.stage.rect.top, this.stage.rect.width, this.stage.rect.height);
+                this.draw(true);
+                var colorData=this.stage.canvasBuffer.getImageData(0,0,this.stage.rect.width, this.stage.rect.height);
                 var x,y,area=new Flat3D.Rect.create(Math.floor(this.rect.left), Math.floor(this.rect.top),Math.floor(this.rect.right), Math.floor(this.rect.bottom)),left=-Math.floor(this.stage.rect.left),top=-Math.floor(this.stage.rect.top);
                 /*区域矩形
                 this.stage.canvas.strokeStyle = "green";
                 this.stage.canvas.strokeRect(area.left, area.top, area.width, area.height);
                 */
-                this.stage.canvas.fillStyle="rgba(255,255,0,0.4)";
+                //this.stage.canvas.fillStyle="rgba(255,255,0,0.4)";
                 for(var a=area.left;a<=area.right;a++){
                     for(var b=area.top;b<=area.bottom;b++){
                         x=a+left;
                         y=b+top;
                         if(x>-1 && y>-1 && x<this.stage.rect.width && y<this.stage.rect.height && this.stage.rect.in(a,b)){
-                            if(this.stage.matrix[x][y]==undefined||(this.stage.matrix[x][y] && this.stage.matrix[x][y].belong!=this)){
-                                var color=Flat3D.Value.getStageColor(this.stage,x,y);
-                                if(color.alpha>0){
-                                    color.belong=this;
-                                    this.stage.matrix[x][y]=color;
-                                    /*非空区域
-                                    this.stage.canvas.beginPath();
-                                    this.stage.canvas.arc(a, b, 1, 0, Math.PI * 2);
-                                    this.stage.canvas.fill();
-                                    */
-                                }
+                            var color=Flat3D.Value.getStageColor(colorData,x,y);
+                            if(color.alpha>0){
+                                color.belong=this;
+                                this.stage.matrix[x][y]=color;
+                                /*非空区域
+                                this.stage.canvas.beginPath();
+                                this.stage.canvas.arc(a, b, 1, 0, Math.PI * 2);
+                                this.stage.canvas.fill();
+                                */
                             }
                         }
                     }
                 }
+                colorData=null;
             },
             setTexture: function (url, moveToCenter, loadComplete) {
                 var thing = this;
@@ -560,8 +568,8 @@ var Flat3D = {
                 value = newValue;
             }
         },
-        getStageColor: function (stage, x, y) {
-            var data = stage.colorData;
+        getStageColor: function (colorData, x, y) {
+            var data = colorData;
             var i=(data.width*y+x)*4;
             var color = {
                 red: data.data[i],

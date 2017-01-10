@@ -3,7 +3,7 @@
     <head>
         <script src="Flat3D.class.js"></script>
         <style>
-            canvas{border:1px solid gray}
+            canvas{background-color:gray}
         </style>
     </head>
     <body>
@@ -13,20 +13,11 @@
         <a href="javascript:stage.updateMatrix()">updateMatrix</a>
     </body>
     <script>
-        var a = {
-            hello: {
-                world: {
-                    me: {
-                        x: 11
-                    }
-                }
-            }
-        };
         var ele=document.getElementById("StageCanvas");
         var stage=new Flat3D.Stage();
-        stage.setFPS(50);
+        stage.setFPS(60);
         stage.tickSpeed=1;
-        stage.bindCanvas(ele,1024,800);
+        stage.bindCanvas(ele,900,600);
         console.log(stage);
         var container=new Flat3D.Contain.Container(stage,new Flat3D.Point(100,100,0));
         container.transform.translate={x:0,y:0};
@@ -45,66 +36,27 @@
         container.setThing(thing);
         var thing2=new Flat3D.Contain.Thing(stage);
         thing2.setTexture("./logo.png",true);
-        thing2.texture.position={x:50,y:-50};
-        thing2.texture.transform.scale={scaleWidth:0.8,scaleHeight:0.8};
-        //container.setThing(thing2);
-        var thing3=new Flat3D.Thing(stage,new Flat3D.Point(-100,0,0));
+        thing2.texture.position={x:100,y:50};
+        thing2.texture.transform.scale={scaleWidth:0.5,scaleHeight:0.5};
+        container.setThing(thing2);
+        var thing3=new Flat3D.Thing(stage,new Flat3D.Point(-100,100,0));
         thing3.setTexture("./profile.png",true);
-        thing3.texture.transform.scale={scaleWidth:0.8,scaleHeight:0.8};
+        thing3.texture.transform.scale={scaleWidth:0.6,scaleHeight:0.6};
         thing3.click=function(e){
             console.log("click profile logo");
         }
         stage.setThing(thing3);
-
-        
         stage.start();
-        container.setFrameAnimationByParamKey(
-            "transform.rotate.angle",
-            0,
-            360,
-            Flat3D.Ease.Linear,
-            20000
-        ).start();
-        thing.setFrameAnimationByParamKey(
-            "texture.position.x",
-            0,
-            200,
-            Flat3D.Ease.Linear,
-            20000
-        ).start();
+        container.setFrameAnimationByParamKey("transform.rotate.angle",0,360,Flat3D.Ease.Linear,3000).start();
+        thing.setFrameAnimationByParamKey("texture.position.x",0,200,Flat3D.Ease.Linear,3000).start();
+        thing3.setFrameAnimationByParamKey("texture.position.x",0,-200,Flat3D.Ease.Linear,2000).start();
+        thing3.setFrameAnimationByParamKey("texture.position.y",0,100,Flat3D.Ease.Bounce.easeOut,2000).start();
+        thing.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,360,Flat3D.Ease.Linear,2000).start();
         
-        thing3.setFrameAnimationByParamKey(
-            "texture.position.x",
-            0,
-            -200,
-            Flat3D.Ease.Linear,
-            20000
-        ).start();
-        thing3.setFrameAnimationByParamKey(
-            "texture.position.y",
-            0,
-            100,
-            Flat3D.Ease.Bounce.easeOut,
-            20000
-        ).start();
-        thing.setFrameAnimationByParamKey(
-            "texture.transform.rotate.angle",
-            0,
-            360,
-            Flat3D.Ease.Linear,
-            20000
-        ).start();
         //stage.stageCamera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 135,45, 100);
         //var p = new Flat3D.Point(40,40,0);
         //console.log(Flat3D.Coordinate.point3DTo2D(p,c));
         //console.log(Flat3D.Coordinate.sphrToRect(90,0,1));
-        Flat3D.Value.setValue(a, "hello.world.me", 22);
-        /*setTimeout(function(){
-            stage.pause();
-            setTimeout(function(){
-                stage.start();
-            },1000);
-        },1000);*/
-        console.log(a);
+         
     </script> 
 </html>
