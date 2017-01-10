@@ -15,6 +15,7 @@ var Flat3D = {
             centerPosition: new Flat3D.Point(0, 0, 0),
             canvas: undefined,
             matrix: undefined,
+            colorData:undefined,
             updateDuration: 16,//60 fps
             _lastUpdate: 0,
             canvasOption: {
@@ -23,12 +24,19 @@ var Flat3D = {
             bindCanvas: function (canvasElement, width, height) {
                 canvasElement.width = width;
                 canvasElement.height = height;
+                canvasElement.addEventListener("click",function(e){
+                    stage.updateMatrix();
+                    if(stage.matrix[e.offsetX][e.offsetY] && stage.matrix[e.offsetX][e.offsetY].belong){
+                        stage.matrix[e.offsetX][e.offsetY].belong.click(e);
+                    }
+                },false);
                 this.rect = new Flat3D.Rect.createFromSizeCenter(0, 0, width, height);
                 this.centerPosition = new Flat3D.Point(width / 2, height / 2, 0);
                 this.camera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 180, 90, 100);
                 this.canvas = canvasElement.getContext("2d");
-                this.canvas.translate(width / 2, height / 2);
-                this.matrix = new Flat3D.Matrix(width, height);
+                //console.log(this.rect);
+                this.canvas.translate(-this.rect.left, -this.rect.top);
+                this.updateStage();
             },
             setThing: function (thing) {
                 var newThings = [];
@@ -65,7 +73,7 @@ var Flat3D = {
                 if (this.canvas) {
                     this.canvas.clearRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
                     this.canvas.beginPath();
-                    this.canvas.arc(0, 0, 5, 0, Math.PI * 2);
+                    this.canvas.arc(0, 0, 2, 0, Math.PI * 2);
                     this.canvas.fillStyle = "black";
                     this.canvas.fill();
                     for (var a = 0; a < this.things.length; a++) {
@@ -78,6 +86,11 @@ var Flat3D = {
             updateMatrix: function () {
                 if (this.canvas) {
                     this.matrix = new Flat3D.Matrix(this.rect.width, this.rect.height);
+                    this.colorData=this.canvas.getImageData(0,0,this.rect.width, this.rect.height);
+                    for (var a = 0; a < this.things.length; a++) {
+                        this.things[a].updateMatrix();
+                    }
+                    console.log("matrix end");
                 }
             },
             setFPS: function (FPS) {
@@ -146,6 +159,10 @@ var Flat3D = {
             return {
                 left: left, top: top, right: right, bottom: bottom,
                 width: right - left, height: bottom - top,
+                in:function(x,y){
+                    if(x>=this.left && x<=this.right && y>=this.top && y<=this.bottom)return true;
+                    return false;
+                }
 
             };
         }
@@ -193,10 +210,17 @@ var Flat3D = {
                 }
             };
             container.draw = function () {
-                this._2dCoordinate == Flat3D.Coordinate.point3DTo2D(this.position, this.stage.camera)
+                this._2dCoordinate == Flat3D.Coordinate.point3DTo2D(this.position, this.stage.camera);
                 for (var a = 0; a < this.things.length; a++) {
                     if (this.things[a]) {
                         this.things[a].draw();
+                    }
+                }
+            };
+            container.updateMatrix = function () {
+                for (var a = 0; a < this.things.length; a++) {
+                    if (this.things[a]) {
+                        this.things[a].updateMatrix();
                     }
                 }
             };
@@ -216,7 +240,9 @@ var Flat3D = {
             position: position,
             effectCallBack: function (fromThing) { },
             effectSet: [],
+            rect:undefined,
             animations: [],
+            click:function(e){},
             texture: {
                 imgCanDraw: false,
                 img: undefined,
@@ -286,10 +312,13 @@ var Flat3D = {
                         canvas.translate(cRotate.x, cRotate.y);
                         canvas.scale(trans.scale.scaleWidth, trans.scale.scaleHeight);
                         canvas.rotate(cRotate.angle);
+                        /* 标记container旋转中心
                         canvas.beginPath();
                         canvas.arc(0, 0, 5, 0, Math.PI * 2);
                         canvas.fillStyle = "pink";
                         canvas.fill();
+                        */
+
                         canvas.translate(cx, cy);
 
                         
@@ -303,57 +332,98 @@ var Flat3D = {
                         scaleWidth: this.texture.transform.scale.scaleWidth,
                         scaleHeight: this.texture.transform.scale.scaleHeight,
                     };
-                    canvas.lineWidth = 2;
+                    
                     canvas.translate(rotate.x, rotate.y);
                     canvas.scale(scale.scaleWidth, scale.scaleHeight);
                     canvas.rotate(rotate.angle);
                     canvas.drawImage(this.texture.img, x, y);
-                    canvas.strokeStyle = "green";
-                    canvas.strokeRect(x, y, this.texture.img.width, this.texture.img.height);
-
-                    
-                    
-
-
-
                     canvas.rotate(-rotate.angle);
                     canvas.scale(1 / scale.scaleWidth, 1 / scale.scaleHeight);
                     canvas.translate(-rotate.x, -rotate.y);
 
+                    /* 标记thing旋转中心
                     canvas.beginPath();
                     canvas.arc(rotate.x, rotate.y, 10, 0, Math.PI * 2);
                     canvas.fillStyle = "blue";
                     canvas.fill();
-
-                    
-
+                    */
                     if (this.container) {
                         canvas.translate(-cx, -cy);
                         canvas.rotate(-cRotate.angle);
                         canvas.scale(1/trans.scale.scaleWidth, 1/trans.scale.scaleHeight);
                         canvas.translate(-cRotate.x, -cRotate.y);
                     }
-
-                    if(this.container){
-                        var ttD=Math.pow(Math.pow(x,2)+Math.pow(y,2),0.5);
-                        var tan=-y/x;
-                        var atan=0;
-                        if(x<0)atan+=180;
-                        atan=atan*Flat3D.Coordinate.PId180+Math.atan(tan)-rotate.angle;
-                        x=ttD*Math.cos(atan)+rotate.x+cx;
-                        y=-ttD*Math.sin(atan)+rotate.y+cy;
-                        var tcD=Math.pow(Math.pow(x,2)+Math.pow(y,2),0.5);
+                    //开始进行区域计算
+                    var areaPoint=[{x:x,y:y},{x:x+this.texture.img.width,y:y},{x:x+this.texture.img.width,y:y+this.texture.img.height},{x:x,y:y+this.texture.img.height}];
+                    var ttD,tan,atan,tcD;
+                    for(var a=0;a<areaPoint.length;a++){
+                        x=areaPoint[a].x;
+                        y=areaPoint[a].y;
+                        ttD=Math.pow(Math.pow(x,2)+Math.pow(y,2),0.5);
                         tan=-y/x;
                         atan=0;
                         if(x<0)atan+=180;
-                        atan=atan*Flat3D.Coordinate.PId180+Math.atan(tan)-cRotate.angle;
-                        x=tcD*Math.cos(atan)+cRotate.x;
-                        y=-tcD*Math.sin(atan)+cRotate.y;
-                        //console.log({x:x,y:y});
+                        atan=atan*Flat3D.Coordinate.PId180+Math.atan(tan)-rotate.angle;
+                        x=ttD*Math.cos(atan)*scale.scaleWidth+rotate.x+cx;
+                        y=-ttD*Math.sin(atan)*scale.scaleHeight+rotate.y+cy;
+                        if(this.container){
+                            tcD=Math.pow(Math.pow(x,2)+Math.pow(y,2),0.5);
+                            tan=-y/x;
+                            atan=0;
+                            if(x<0)atan+=180;
+                            atan=atan*Flat3D.Coordinate.PId180+Math.atan(tan)-cRotate.angle;
+                            x=tcD*Math.cos(atan)*trans.scale.scaleWidth+cRotate.x;
+                            y=-tcD*Math.sin(atan)*trans.scale.scaleHeight+cRotate.y;
+                        }
+                        areaPoint[a].x=x;
+                        areaPoint[a].y=y;
+                        /*区域标记
                         canvas.beginPath();
                         canvas.arc(x, y, 3, 0, Math.PI * 2);
                         canvas.fillStyle = "red";
                         canvas.fill();
+                        */
+                    }
+                    var area=[areaPoint[0].x,areaPoint[0].y,areaPoint[0].x,areaPoint[0].y];
+                    for(var a=1;a<areaPoint.length;a++){
+                        if(areaPoint[a].x<area[0])area[0]=areaPoint[a].x;
+                        if(areaPoint[a].x>area[2])area[2]=areaPoint[a].x;
+                        if(areaPoint[a].y<area[1])area[1]=areaPoint[a].y;
+                        if(areaPoint[a].y>area[3])area[3]=areaPoint[a].y;
+                    }
+                    area=new Flat3D.Rect.create(area[0], area[1],area[2], area[3]);
+                    this.rect=area;
+                    //canvas.strokeStyle = "green";
+                    //canvas.strokeRect(area.left, area.top, area.width, area.height);
+                    
+                }
+            },
+            updateMatrix:function(){
+                //更新区域矩阵
+                var x,y,area=new Flat3D.Rect.create(Math.floor(this.rect.left), Math.floor(this.rect.top),Math.floor(this.rect.right), Math.floor(this.rect.bottom)),left=-Math.floor(this.stage.rect.left),top=-Math.floor(this.stage.rect.top);
+                /*区域矩形
+                this.stage.canvas.strokeStyle = "green";
+                this.stage.canvas.strokeRect(area.left, area.top, area.width, area.height);
+                */
+                this.stage.canvas.fillStyle="rgba(255,255,0,0.4)";
+                for(var a=area.left;a<=area.right;a++){
+                    for(var b=area.top;b<=area.bottom;b++){
+                        x=a+left;
+                        y=b+top;
+                        if(x>-1 && y>-1 && x<this.stage.rect.width && y<this.stage.rect.height && this.stage.rect.in(a,b)){
+                            if(this.stage.matrix[x][y]==undefined||(this.stage.matrix[x][y] && this.stage.matrix[x][y].belong!=this)){
+                                var color=Flat3D.Value.getStageColor(this.stage,x,y);
+                                if(color.alpha>0){
+                                    color.belong=this;
+                                    this.stage.matrix[x][y]=color;
+                                    /*非空区域
+                                    this.stage.canvas.beginPath();
+                                    this.stage.canvas.arc(a, b, 1, 0, Math.PI * 2);
+                                    this.stage.canvas.fill();
+                                    */
+                                }
+                            }
+                        }
                     }
                 }
             },
@@ -490,14 +560,14 @@ var Flat3D = {
                 value = newValue;
             }
         },
-        getCanvasColor: function (canvas, x, y) {
-            var data = canvas.getImageData(x, y);
+        getStageColor: function (stage, x, y) {
+            var data = stage.colorData;
+            var i=(data.width*y+x)*4;
             var color = {
-                red: data.data[0],
-                green: data.data[1],
-                blue: data.data[2],
-                alpha: data.data[3],
-                id: data.data.join(","),
+                red: data.data[i],
+                green: data.data[i+1],
+                blue: data.data[i+2],
+                alpha: data.data[i+3],
             };
             return color;
         }

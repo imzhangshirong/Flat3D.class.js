@@ -8,6 +8,9 @@
     </head>
     <body>
         <canvas id="StageCanvas">Your Browser don't support canvas</canvas>
+        <a href="javascript:stage.start()">start</a>
+        <a href="javascript:stage.pause()">pause</a>
+        <a href="javascript:stage.updateMatrix()">updateMatrix</a>
     </body>
     <script>
         var a = {
@@ -31,10 +34,14 @@
         container.transform.scale={scaleWidth:1,scaleHeight:1};
         stage.setThing(container);
         var thing=new Flat3D.Contain.Thing(stage);
+        thing.click=function(e){
+            console.log("click logo");
+        }
         thing.setTexture("./logo.png",true);
         //thing.texture.position.x=100;
         thing.texture.transform.rotate.center={x:0,y:0};
         thing.texture.transform.rotate.angle=0;
+        thing.texture.transform.scale={scaleWidth:0.8,scaleHeight:0.8};
         container.setThing(thing);
         var thing2=new Flat3D.Contain.Thing(stage);
         thing2.setTexture("./logo.png",true);
@@ -44,6 +51,9 @@
         var thing3=new Flat3D.Thing(stage,new Flat3D.Point(-100,0,0));
         thing3.setTexture("./profile.png",true);
         thing3.texture.transform.scale={scaleWidth:0.8,scaleHeight:0.8};
+        thing3.click=function(e){
+            console.log("click profile logo");
+        }
         stage.setThing(thing3);
 
         
@@ -53,14 +63,14 @@
             0,
             360,
             Flat3D.Ease.Linear,
-            2000
+            20000
         ).start();
         thing.setFrameAnimationByParamKey(
             "texture.position.x",
             0,
             200,
             Flat3D.Ease.Linear,
-            2000
+            20000
         ).start();
         
         thing3.setFrameAnimationByParamKey(
@@ -68,21 +78,21 @@
             0,
             -200,
             Flat3D.Ease.Linear,
-            2000
+            20000
         ).start();
         thing3.setFrameAnimationByParamKey(
             "texture.position.y",
             0,
             100,
             Flat3D.Ease.Bounce.easeOut,
-            2000
+            20000
         ).start();
         thing.setFrameAnimationByParamKey(
             "texture.transform.rotate.angle",
             0,
             360,
             Flat3D.Ease.Linear,
-            2000
+            20000
         ).start();
         //stage.stageCamera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 135,45, 100);
         //var p = new Flat3D.Point(40,40,0);
