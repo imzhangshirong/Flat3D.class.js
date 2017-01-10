@@ -63,14 +63,22 @@ var Flat3D = {
             },
             updateStage: function () {
                 if (this.canvas) {
-                    this.matrix = new Flat3D.Matrix(this.rect.width, this.rect.height);
                     this.canvas.clearRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height);
+                    this.canvas.beginPath();
+                    this.canvas.arc(0, 0, 5, 0, Math.PI * 2);
+                    this.canvas.fillStyle = "black";
+                    this.canvas.fill();
                     for (var a = 0; a < this.things.length; a++) {
                         this.things[a].draw();
                     }
                 }
 
                 //console.log(stage.tick);
+            },
+            updateMatrix: function () {
+                if (this.canvas) {
+                    this.matrix = new Flat3D.Matrix(this.rect.width, this.rect.height);
+                }
             },
             setFPS: function (FPS) {
                 this.updateDuration = 1000 / FPS;
@@ -120,6 +128,9 @@ var Flat3D = {
             },
             add: function (target) {
                 return new Flat3D.Point(target.x + this.x, target.y + this.y, target.z + this.z);
+            },
+            sub: function (target) {
+                return new Flat3D.Point(-target.x + this.x, -target.y + this.y, -target.z + this.z);
             }
         };
         return point;
@@ -139,56 +150,64 @@ var Flat3D = {
             };
         }
     },
-    Container: function (stage, position) {
-        var container = new Flat3D.Thing(stage, position);
-        container.texture = undefined;
-        container.things = [];
-        container.setThing = function (thing) {
-            thing.position.z=this.position.z;
-            thing.container=this;
-            var newThings = [];
-            for (var a = 0; a < this.things.length; a++) {
-                if (this.things[a]) {
-                    newThings.push(this.things[a]);
+    Contain: {
+        Container: function (stage, position) {
+            var container = new Flat3D.Thing(stage, position);
+            container.texture = undefined;
+            container.things = [];
+            container.setThing = function (thing) {
+                thing.container = this;
+                var newThings = [];
+                for (var a = 0; a < this.things.length; a++) {
+                    if (this.things[a]) {
+                        newThings.push(this.things[a]);
+                    }
                 }
-            }
-            this.things = newThings;
-            this.things.push(thing);
-            return thing;
-        };
-        container.removeThing = function (thing) {
-            var id = this.things.indexOf(thing);
-            if (id > -1) {
-                this.things[id].destroy();
-                this.things[id] = undefined;
-            }
-        };
-        container.transform = {
-            translate: {
-                x: 0,
-                y: 0
-            },
-            scale: {
-                scaleWidth: 1,
-                scaleHeight: 1
-            },
-            rotate: {
-                center: {
+                this.things = newThings;
+                this.things.push(thing);
+                return thing;
+            };
+            container.removeThing = function (thing) {
+                var id = this.things.indexOf(thing);
+                if (id > -1) {
+                    this.things[id].destroy();
+                    this.things[id] = undefined;
+                }
+            };
+            container._2dCoordinate = Flat3D.Coordinate.point3DTo2D(position, stage.camera);
+            container.transform = {
+                translate: {
                     x: 0,
                     y: 0
                 },
-                angle: 0
-            }
-        };
-        container.draw = function () {
-            for (var a = 0; a < this.things.length; a++) {
-                if (this.things[a]) {
-                    this.things[a].draw();
+                scale: {
+                    scaleWidth: 1,
+                    scaleHeight: 1
+                },
+                rotate: {
+                    center: {
+                        x: 0,
+                        y: 0
+                    },
+                    angle: 0
                 }
-            }
-        };
+            };
+            container.draw = function () {
+                this._2dCoordinate == Flat3D.Coordinate.point3DTo2D(this.position, this.stage.camera)
+                for (var a = 0; a < this.things.length; a++) {
+                    if (this.things[a]) {
+                        this.things[a].draw();
+                    }
+                }
+            };
 
-        return container;
+            return container;
+        },
+        Thing:function(stage){
+            var thing=new Flat3D.Thing(stage);
+            delete thing.position;
+            return thing;
+        }
     },
     Thing: function (stage, position) {
         var thing = {
@@ -243,53 +262,102 @@ var Flat3D = {
                 };
                 if (this.texture.img && this.texture.imgCanDraw && this.stage.canvas) {
                     var canvas = this.stage.canvas;
-                    var position;
                     if (this.container) {
-                        position = this.position;
-                        position.z=this.container.position.z;
                         trans = this.container.transform;
                     }
-                    else {
-                        position = this.position;
-                    }
-                    var cTrans = Flat3D.Coordinate.point3DTo2D(position, this.stage.camera);
-                    var x = cTrans.position2D.x + this.texture.transform.translate.x;
-                    var y = -cTrans.position2D.y + this.texture.transform.translate.y;
-                    var dx=0;
-                    var dy=0;
+                    var x = this.texture.transform.translate.x - this.texture.transform.rotate.center.x;//相对旋转中心有位移
+                    var y = this.texture.transform.translate.y - this.texture.transform.rotate.center.y;
                     var rotate = {
                         x: this.texture.position.x + this.texture.transform.rotate.center.x,
                         y: this.texture.position.y + this.texture.transform.rotate.center.y,
-                        angle: this.texture.transform.rotate.angle + trans.rotate.angle,
+                        angle: this.texture.transform.rotate.angle * Flat3D.Coordinate.PId180
+                    };
+                    var cRotate = {x:0,y:0,angle:0};
+                    var cx=0;
+                    var cy=0;
+                    if (this.container) {
+                        cx=this.container.transform.translate.x - this.container.transform.rotate.center.x;
+                        cy=this.container.transform.translate.y - this.container.transform.rotate.center.y;
+                        cRotate = {
+                            x: this.container._2dCoordinate.position2D.x+ this.container.transform.rotate.center.x,
+                            y: -this.container._2dCoordinate.position2D.y+this.container.transform.rotate.center.y,
+                            angle: this.container.transform.rotate.angle * Flat3D.Coordinate.PId180
+                        }
+                        canvas.translate(cRotate.x, cRotate.y);
+                        canvas.scale(trans.scale.scaleWidth, trans.scale.scaleHeight);
+                        canvas.rotate(cRotate.angle);
+                        canvas.beginPath();
+                        canvas.arc(0, 0, 5, 0, Math.PI * 2);
+                        canvas.fillStyle = "pink";
+                        canvas.fill();
+                        canvas.translate(cx, cy);
+
+                        
                     }
-                    if(this.container){
-                        var cTransR = Flat3D.Coordinate.point3DTo2D(this.container.position.add({x:this.container.transform.rotate.center.x,y:this.container.transform.rotate.center.y,z:0}), this.stage.camera);
-                        var d1=rotate.x-cTransR.position2D.x;
-                        var d2=rotate.y+cTransR.position2D.y;
-                        var d=Math.pow(Math.pow(d1,2)+Math.pow(d2,2),0.5);
-                        var tan=-d2/d1;
-                        var atan=90;
-                        if(d1<0)atan+=180;
-                        var an=(trans.rotate.angle+atan)*Flat3D.Coordinate.PId180-Math.atan(tan);
-                        dx=d*Math.sin(an);
-                        dy=-d*Math.cos(an);
-                        rotate.x=cTransR.position2D.x+dx;
-                        rotate.y=-cTransR.position2D.y+dy;
+                    else {
+                        var cTrans = Flat3D.Coordinate.point3DTo2D(this.position, this.stage.camera);
+                        rotate.x += cTrans.position2D.x;
+                        rotate.y += -cTrans.position2D.y;
                     }
                     var scale = {
-                        scaleWidth: this.texture.transform.scale.scaleWidth * trans.scale.scaleWidth,
-                        scaleHeight: this.texture.transform.scale.scaleHeight * trans.scale.scaleHeight,
+                        scaleWidth: this.texture.transform.scale.scaleWidth,
+                        scaleHeight: this.texture.transform.scale.scaleHeight,
                     };
+                    canvas.lineWidth = 2;
                     canvas.translate(rotate.x, rotate.y);
                     canvas.scale(scale.scaleWidth, scale.scaleHeight);
-                    canvas.rotate(rotate.angle * Flat3D.Coordinate.PId180);
+                    canvas.rotate(rotate.angle);
                     canvas.drawImage(this.texture.img, x, y);
-                    canvas.rotate(-rotate.angle * Flat3D.Coordinate.PId180);
+                    canvas.strokeStyle = "green";
+                    canvas.strokeRect(x, y, this.texture.img.width, this.texture.img.height);
+
+                    
+                    
+
+
+
+                    canvas.rotate(-rotate.angle);
                     canvas.scale(1 / scale.scaleWidth, 1 / scale.scaleHeight);
                     canvas.translate(-rotate.x, -rotate.y);
+
+                    canvas.beginPath();
+                    canvas.arc(rotate.x, rotate.y, 10, 0, Math.PI * 2);
+                    canvas.fillStyle = "blue";
+                    canvas.fill();
+
+                    
+
+                    if (this.container) {
+                        canvas.translate(-cx, -cy);
+                        canvas.rotate(-cRotate.angle);
+                        canvas.scale(1/trans.scale.scaleWidth, 1/trans.scale.scaleHeight);
+                        canvas.translate(-cRotate.x, -cRotate.y);
+                    }
+
+                    if(this.container){
+                        var ttD=Math.pow(Math.pow(x,2)+Math.pow(y,2),0.5);
+                        var tan=-y/x;
+                        var atan=0;
+                        if(x<0)atan+=180;
+                        atan=atan*Flat3D.Coordinate.PId180+Math.atan(tan)-rotate.angle;
+                        x=ttD*Math.cos(atan)+rotate.x+cx;
+                        y=-ttD*Math.sin(atan)+rotate.y+cy;
+                        var tcD=Math.pow(Math.pow(x,2)+Math.pow(y,2),0.5);
+                        tan=-y/x;
+                        atan=0;
+                        if(x<0)atan+=180;
+                        atan=atan*Flat3D.Coordinate.PId180+Math.atan(tan)-cRotate.angle;
+                        x=tcD*Math.cos(atan)+cRotate.x;
+                        y=-tcD*Math.sin(atan)+cRotate.y;
+                        //console.log({x:x,y:y});
+                        canvas.beginPath();
+                        canvas.arc(x, y, 3, 0, Math.PI * 2);
+                        canvas.fillStyle = "red";
+                        canvas.fill();
+                    }
                 }
             },
-            setTexture: function (url, moveToCenter,loadComplete) {
+            setTexture: function (url, moveToCenter, loadComplete) {
                 var thing = this;
                 var img = new Image();
                 img.src = url;
@@ -302,7 +370,7 @@ var Flat3D = {
                             y: -this.height / 2,
                         }
                     }
-                    if(loadComplete)loadComplete(thing,this);
+                    if (loadComplete) loadComplete(thing, this);
                 }
                 this.texture.img = img;
                 return this.texture.img;
@@ -378,7 +446,7 @@ var Flat3D = {
             temp_position[2] = temp.x * eyeVector[2].x + temp.y * eyeVector[2].y + temp.z * eyeVector[2].z;
             twDimsPos.position2D = {};
             k = -camera.focus / temp_position[2];
-            var k2=Math.pow(k,2);
+            var k2 = Math.pow(k, 2);
             twDimsPos.position2D.x = k2 * temp_position[0];
             twDimsPos.position2D.y = k2 * temp_position[1];
             twDimsPos.deep = temp_position[2];
@@ -429,6 +497,7 @@ var Flat3D = {
                 green: data.data[1],
                 blue: data.data[2],
                 alpha: data.data[3],
+                id: data.data.join(","),
             };
             return color;
         }
@@ -470,9 +539,9 @@ var Flat3D = {
                         if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                         ani.stop();
                     }
-                    else{
+                    else {
                         ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK;
-                        if (ani.tick > ani.finalTick)ani.tick=ani.finalTick;
+                        if (ani.tick > ani.finalTick) ani.tick = ani.finalTick;
                         var keys = Object.keys(ani.effectParams);
                         for (var a = 0; a < keys.length; a++) {
                             var value = Flat3D.Value.getValue(ani.thing, keys[a]);
@@ -525,9 +594,9 @@ var Flat3D = {
                         if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                         ani.stop();
                     }
-                    else{
+                    else {
                         ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK;
-                        if (ani.tick > ani.finalTick)ani.tick = ani.finalTick;
+                        if (ani.tick > ani.finalTick) ani.tick = ani.finalTick;
                         var value = Flat3D.Value.getValue(ani.thing, ani.effectParamKey);
                         if (ani.Ease) {
                             value = ani.Ease(ani.tick, ani._ease.start, ani._ease.d, ani.finalTick);

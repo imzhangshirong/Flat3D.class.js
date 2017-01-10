@@ -21,45 +21,64 @@
         };
         var ele=document.getElementById("StageCanvas");
         var stage=new Flat3D.Stage();
-        stage.bindCanvas(ele,501,500);
-        var container=new Flat3D.Container(stage,new Flat3D.Point(0,0,0));
-        var thing=new Flat3D.Thing(stage,new Flat3D.Point(0,0,0));
-        var thing2=new Flat3D.Thing(stage,new Flat3D.Point(0,0,0));
-        stage.setThing(container);
-        container.setThing(thing);
-        container.setThing(thing2);
-        container.transform.rotate.center={x:0,y:0};
-        thing.setTexture("./logo.png",true);
-        thing2.setTexture("./logo.png",true,function(_thing){
-            _thing.texture.transform.translate.x+=100;
-        });
-        
+        stage.setFPS(50);
+        stage.tickSpeed=1;
+        stage.bindCanvas(ele,1024,800);
         console.log(stage);
-        stage.setFPS(30);
+        var container=new Flat3D.Contain.Container(stage,new Flat3D.Point(100,100,0));
+        container.transform.translate={x:0,y:0};
+        container.transform.rotate.center={x:50,y:50};
+        container.transform.scale={scaleWidth:1,scaleHeight:1};
+        stage.setThing(container);
+        var thing=new Flat3D.Contain.Thing(stage);
+        thing.setTexture("./logo.png",true);
+        //thing.texture.position.x=100;
+        thing.texture.transform.rotate.center={x:0,y:0};
+        thing.texture.transform.rotate.angle=0;
+        container.setThing(thing);
+        var thing2=new Flat3D.Contain.Thing(stage);
+        thing2.setTexture("./logo.png",true);
+        thing2.texture.position={x:50,y:-50};
+        thing2.texture.transform.scale={scaleWidth:0.8,scaleHeight:0.8};
+        //container.setThing(thing2);
+        var thing3=new Flat3D.Thing(stage,new Flat3D.Point(-100,0,0));
+        thing3.setTexture("./profile.png",true);
+        thing3.texture.transform.scale={scaleWidth:0.8,scaleHeight:0.8};
+        stage.setThing(thing3);
+
+        
         stage.start();
-        thing.setFrameAnimationByParamKey(
-            "texture.position.x",
-            0,
-            200,
-            Flat3D.Ease.Linear,
-            2000
-        ).start();
-        thing2.setFrameAnimationByParamKey(
-            "texture.position.x",
-            0,
-            200,
-            Flat3D.Ease.Linear,
-            2000
-        ).start();
-        thing.setFrameAnimationByParamKey(
-            "texture.transform.rotate.angle",
+        container.setFrameAnimationByParamKey(
+            "transform.rotate.angle",
             0,
             360,
             Flat3D.Ease.Linear,
             2000
-        );//.start();
-        container.setFrameAnimationByParamKey(
-            "transform.rotate.angle",
+        ).start();
+        thing.setFrameAnimationByParamKey(
+            "texture.position.x",
+            0,
+            200,
+            Flat3D.Ease.Linear,
+            2000
+        ).start();
+        
+        thing3.setFrameAnimationByParamKey(
+            "texture.position.x",
+            0,
+            -200,
+            Flat3D.Ease.Linear,
+            2000
+        ).start();
+        thing3.setFrameAnimationByParamKey(
+            "texture.position.y",
+            0,
+            100,
+            Flat3D.Ease.Bounce.easeOut,
+            2000
+        ).start();
+        thing.setFrameAnimationByParamKey(
+            "texture.transform.rotate.angle",
             0,
             360,
             Flat3D.Ease.Linear,
@@ -70,6 +89,12 @@
         //console.log(Flat3D.Coordinate.point3DTo2D(p,c));
         //console.log(Flat3D.Coordinate.sphrToRect(90,0,1));
         Flat3D.Value.setValue(a, "hello.world.me", 22);
+        /*setTimeout(function(){
+            stage.pause();
+            setTimeout(function(){
+                stage.start();
+            },1000);
+        },1000);*/
         console.log(a);
     </script> 
 </html>
