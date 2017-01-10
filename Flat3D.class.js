@@ -12,30 +12,25 @@ var Flat3D = {
             tick: 0,
             rect: undefined,
             tickSpeed: 1,
-            centerPosition: new Flat3D.Point(0, 0, 0),
             canvas: undefined,
-            canvasBuffer:undefined,
+            canvasBuffer: undefined,
             matrix: undefined,
             updateDuration: 16,//60 fps
             _lastUpdate: 0,
-            canvasOption: {
-
-            },
             bindCanvas: function (canvasElement, width, height) {
                 canvasElement.width = width;
                 canvasElement.height = height;
-                var buffer= document.createElement("canvas");
-                buffer.width=width;
-                buffer.height=height;
-                this.canvasBuffer=buffer.getContext("2d");
-                canvasElement.addEventListener("click",function(e){
+                var buffer = document.createElement("canvas");
+                buffer.width = width;
+                buffer.height = height;
+                this.canvasBuffer = buffer.getContext("2d");
+                canvasElement.addEventListener("click", function (e) {
                     stage.updateMatrix();
-                    if(stage.matrix[e.offsetX][e.offsetY] && stage.matrix[e.offsetX][e.offsetY].belong){
+                    if (stage.matrix[e.offsetX][e.offsetY] && stage.matrix[e.offsetX][e.offsetY].belong) {
                         stage.matrix[e.offsetX][e.offsetY].belong.click(e);
                     }
-                },false);
+                }, false);
                 this.rect = new Flat3D.Rect.createFromSizeCenter(0, 0, width, height);
-                this.centerPosition = new Flat3D.Point(width / 2, height / 2, 0);
                 this.camera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 180, 90, 100);
                 this.canvas = canvasElement.getContext("2d");
                 //console.log(this.rect);
@@ -122,17 +117,7 @@ var Flat3D = {
             angleA: angleA,
             angleB: angleB,
             position: centerPoint,
-            focus: focus,
-            setAngle: function (_angleA, _angleB) {
-                this.angleA = _angleA;
-                this.angleB = _angleB;
-            },
-            setPosition: function (_centerPoint) {
-                this.position = _centerPoint;
-            },
-            setFocus: function (_focus) {
-                this.focus = _focus;
-            },
+            focus: focus
         };
     },
     Point: function (x, y, z) {
@@ -161,8 +146,8 @@ var Flat3D = {
             return {
                 left: left, top: top, right: right, bottom: bottom,
                 width: right - left, height: bottom - top,
-                in:function(x,y){
-                    if(x>=this.left && x<=this.right && y>=this.top && y<=this.bottom)return true;
+                in: function (x, y) {
+                    if (x >= this.left && x <= this.right && y >= this.top && y <= this.bottom) return true;
                     return false;
                 }
 
@@ -229,69 +214,81 @@ var Flat3D = {
 
             return container;
         },
-        Thing:function(stage){
-            var thing=new Flat3D.Thing(stage);
+        Thing: function (stage) {
+            var thing = new Flat3D.Thing(stage);
             delete thing.position;
             return thing;
         }
     },
-    Thing: function (stage, position) {
-        var thing = {
-            stage: stage,
-            canvasRect: undefined,
-            position: position,
-            effectCallBack: function (fromThing) { },
-            effectSet: [],
-            rect:undefined,
-            animations: [],
-            click:function(e){},
-            texture: {
-                imgCanDraw: false,
-                img: undefined,
-                position: {
+    Texture: function (thing, url, moveToCenter, loadComplete) {
+        var texture = {
+            imageCanDraw: false,
+            image: undefined,
+            thing: thing,
+            position: {
+                x: 0,
+                y: 0
+            },
+            transform: new Flat3D.Transform(),
+            setImage: function (url, moveToCenter, loadComplete) {
+                var thing = this.thing;
+                var image = new Image();
+                image.src = url;
+                texture.imageCanDraw = false;
+                image.onload = function () {
+                    texture.imageCanDraw = true;
+                    if (moveToCenter) {
+                        texture.transform.translate = {
+                            x: -this.width / 2,
+                            y: -this.height / 2,
+                        }
+                    }
+                    if (loadComplete) loadComplete(thing, texture, this);
+                }
+                this.image = image;
+                return this.image;
+            },
+        };
+        if (arguments.length > 1) {
+            texture.setImage(url, moveToCenter, loadComplete);
+        }
+        return texture;
+    },
+    Transform: function () {
+        return {
+            translate: {
+                x: 0,
+                y: 0
+            },
+            scale: {
+                scaleWidth: 1,
+                scaleHeight: 1
+            },
+            rotate: {
+                center: {
                     x: 0,
                     y: 0
                 },
-                transform: {
-                    translate: {
-                        x: 0,
-                        y: 0
-                    },
-                    scale: {
-                        scaleWidth: 1,
-                        scaleHeight: 1
-                    },
-                    rotate: {
-                        center: {
-                            x: 0,
-                            y: 0
-                        },
-                        angle: 0
-                    }
-                }
-            },
+                angle: 0
+            }
+        };
+    },
+    Thing: function (stage, position) {
+        var thing = {
+            stage: stage,
+            position: position,
+            effectCallBack: function (fromThing) { },
+            effectSet: [],
+            rect: undefined,
+            animations: [],
+            click: function (e) { },
+            texture: undefined,
             draw: function (getArea) {
-                var trans = {
-                    translate: {
-                        x: 0,
-                        y: 0
-                    },
-                    scale: {
-                        scaleWidth: 1,
-                        scaleHeight: 1
-                    },
-                    rotate: {
-                        center: {
-                            x: 0,
-                            y: 0
-                        },
-                        angle: 0
-                    }
-                };
-                if (this.texture.img && this.texture.imgCanDraw && this.stage.canvas) {
+                var trans = new Flat3D.Transform();
+                if (this.texture && this.texture.image && this.texture.imageCanDraw && this.stage.canvas) {
                     var canvas = this.stage.canvas;
-                    if(getArea){
-                        canvas=this.stage.canvasBuffer;
+                    if (getArea) {
+                        canvas = this.stage.canvasBuffer;
                     }
                     if (this.container) {
                         trans = this.container.transform;
@@ -303,15 +300,15 @@ var Flat3D = {
                         y: this.texture.position.y + this.texture.transform.rotate.center.y,
                         angle: this.texture.transform.rotate.angle * Flat3D.Coordinate.PId180
                     };
-                    var cRotate = {x:0,y:0,angle:0};
-                    var cx=0;
-                    var cy=0;
+                    var cRotate = { x: 0, y: 0, angle: 0 };
+                    var cx = 0;
+                    var cy = 0;
                     if (this.container) {
-                        cx=this.container.transform.translate.x - this.container.transform.rotate.center.x;
-                        cy=this.container.transform.translate.y - this.container.transform.rotate.center.y;
+                        cx = this.container.transform.translate.x - this.container.transform.rotate.center.x;
+                        cy = this.container.transform.translate.y - this.container.transform.rotate.center.y;
                         cRotate = {
-                            x: this.container._2dCoordinate.position2D.x+ this.container.transform.rotate.center.x,
-                            y: -this.container._2dCoordinate.position2D.y+this.container.transform.rotate.center.y,
+                            x: this.container._2dCoordinate.position2D.x + this.container.transform.rotate.center.x,
+                            y: -this.container._2dCoordinate.position2D.y + this.container.transform.rotate.center.y,
                             angle: this.container.transform.rotate.angle * Flat3D.Coordinate.PId180
                         }
                         canvas.translate(cRotate.x, cRotate.y);
@@ -326,7 +323,7 @@ var Flat3D = {
 
                         canvas.translate(cx, cy);
 
-                        
+
                     }
                     else {
                         var cTrans = Flat3D.Coordinate.point3DTo2D(this.position, this.stage.camera);
@@ -337,11 +334,11 @@ var Flat3D = {
                         scaleWidth: this.texture.transform.scale.scaleWidth,
                         scaleHeight: this.texture.transform.scale.scaleHeight,
                     };
-                    
+
                     canvas.translate(rotate.x, rotate.y);
                     canvas.scale(scale.scaleWidth, scale.scaleHeight);
                     canvas.rotate(rotate.angle);
-                    canvas.drawImage(this.texture.img, x, y);
+                    canvas.drawImage(this.texture.image, x, y);
                     canvas.rotate(-rotate.angle);
                     canvas.scale(1 / scale.scaleWidth, 1 / scale.scaleHeight);
                     canvas.translate(-rotate.x, -rotate.y);
@@ -355,33 +352,33 @@ var Flat3D = {
                     if (this.container) {
                         canvas.translate(-cx, -cy);
                         canvas.rotate(-cRotate.angle);
-                        canvas.scale(1/trans.scale.scaleWidth, 1/trans.scale.scaleHeight);
+                        canvas.scale(1 / trans.scale.scaleWidth, 1 / trans.scale.scaleHeight);
                         canvas.translate(-cRotate.x, -cRotate.y);
                     }
                     //开始进行区域计算
-                    var areaPoint=[{x:x,y:y},{x:x+this.texture.img.width,y:y},{x:x+this.texture.img.width,y:y+this.texture.img.height},{x:x,y:y+this.texture.img.height}];
-                    var ttD,tan,atan,tcD;
-                    for(var a=0;a<areaPoint.length;a++){
-                        x=areaPoint[a].x;
-                        y=areaPoint[a].y;
-                        ttD=Math.pow(Math.pow(x,2)+Math.pow(y,2),0.5);
-                        tan=-y/x;
-                        atan=0;
-                        if(x<0)atan+=180;
-                        atan=atan*Flat3D.Coordinate.PId180+Math.atan(tan)-rotate.angle;
-                        x=ttD*Math.cos(atan)*scale.scaleWidth+rotate.x+cx;
-                        y=-ttD*Math.sin(atan)*scale.scaleHeight+rotate.y+cy;
-                        if(this.container){
-                            tcD=Math.pow(Math.pow(x,2)+Math.pow(y,2),0.5);
-                            tan=-y/x;
-                            atan=0;
-                            if(x<0)atan+=180;
-                            atan=atan*Flat3D.Coordinate.PId180+Math.atan(tan)-cRotate.angle;
-                            x=tcD*Math.cos(atan)*trans.scale.scaleWidth+cRotate.x;
-                            y=-tcD*Math.sin(atan)*trans.scale.scaleHeight+cRotate.y;
+                    var areaPoint = [{ x: x, y: y }, { x: x + this.texture.image.width, y: y }, { x: x + this.texture.image.width, y: y + this.texture.image.height }, { x: x, y: y + this.texture.image.height }];
+                    var ttD, tan, atan, tcD;
+                    for (var a = 0; a < areaPoint.length; a++) {
+                        x = areaPoint[a].x;
+                        y = areaPoint[a].y;
+                        ttD = Math.pow(Math.pow(x, 2) + Math.pow(y, 2), 0.5);
+                        tan = -y / x;
+                        atan = 0;
+                        if (x < 0) atan += 180;
+                        atan = atan * Flat3D.Coordinate.PId180 + Math.atan(tan) - rotate.angle;
+                        x = ttD * Math.cos(atan) * scale.scaleWidth + rotate.x + cx;
+                        y = -ttD * Math.sin(atan) * scale.scaleHeight + rotate.y + cy;
+                        if (this.container) {
+                            tcD = Math.pow(Math.pow(x, 2) + Math.pow(y, 2), 0.5);
+                            tan = -y / x;
+                            atan = 0;
+                            if (x < 0) atan += 180;
+                            atan = atan * Flat3D.Coordinate.PId180 + Math.atan(tan) - cRotate.angle;
+                            x = tcD * Math.cos(atan) * trans.scale.scaleWidth + cRotate.x;
+                            y = -tcD * Math.sin(atan) * trans.scale.scaleHeight + cRotate.y;
                         }
-                        areaPoint[a].x=x;
-                        areaPoint[a].y=y;
+                        areaPoint[a].x = x;
+                        areaPoint[a].y = y;
                         /*区域标记
                         canvas.beginPath();
                         canvas.arc(x, y, 3, 0, Math.PI * 2);
@@ -389,41 +386,41 @@ var Flat3D = {
                         canvas.fill();
                         */
                     }
-                    var area=[areaPoint[0].x,areaPoint[0].y,areaPoint[0].x,areaPoint[0].y];
-                    for(var a=1;a<areaPoint.length;a++){
-                        if(areaPoint[a].x<area[0])area[0]=areaPoint[a].x;
-                        if(areaPoint[a].x>area[2])area[2]=areaPoint[a].x;
-                        if(areaPoint[a].y<area[1])area[1]=areaPoint[a].y;
-                        if(areaPoint[a].y>area[3])area[3]=areaPoint[a].y;
+                    var area = [areaPoint[0].x, areaPoint[0].y, areaPoint[0].x, areaPoint[0].y];
+                    for (var a = 1; a < areaPoint.length; a++) {
+                        if (areaPoint[a].x < area[0]) area[0] = areaPoint[a].x;
+                        if (areaPoint[a].x > area[2]) area[2] = areaPoint[a].x;
+                        if (areaPoint[a].y < area[1]) area[1] = areaPoint[a].y;
+                        if (areaPoint[a].y > area[3]) area[3] = areaPoint[a].y;
                     }
-                    area=new Flat3D.Rect.create(area[0], area[1],area[2], area[3]);
-                    this.rect=area;
+                    area = new Flat3D.Rect.create(area[0], area[1], area[2], area[3]);
+                    this.rect = area;
                     //canvas.strokeStyle = "green";
                     //canvas.strokeRect(area.left, area.top, area.width, area.height);
-                    
+
                 }
             },
-            updateMatrix:function(){
+            updateMatrix: function () {
                 //更新区域矩阵
-                if(!this.stage.canvasBuffer)return;
+                if (!this.stage.canvasBuffer) return;
                 this.stage.canvasBuffer.clearRect(this.stage.rect.left, this.stage.rect.top, this.stage.rect.width, this.stage.rect.height);
                 this.draw(true);
-                var colorData=this.stage.canvasBuffer.getImageData(0,0,this.stage.rect.width, this.stage.rect.height);
-                var x,y,area=new Flat3D.Rect.create(Math.floor(this.rect.left), Math.floor(this.rect.top),Math.floor(this.rect.right), Math.floor(this.rect.bottom)),left=-Math.floor(this.stage.rect.left),top=-Math.floor(this.stage.rect.top);
+                var colorData = this.stage.canvasBuffer.getImageData(0, 0, this.stage.rect.width, this.stage.rect.height);
+                var x, y, area = new Flat3D.Rect.create(Math.floor(this.rect.left), Math.floor(this.rect.top), Math.floor(this.rect.right), Math.floor(this.rect.bottom)), left = -Math.floor(this.stage.rect.left), top = -Math.floor(this.stage.rect.top);
                 /*区域矩形
                 this.stage.canvas.strokeStyle = "green";
                 this.stage.canvas.strokeRect(area.left, area.top, area.width, area.height);
                 */
                 //this.stage.canvas.fillStyle="rgba(255,255,0,0.4)";
-                for(var a=area.left;a<=area.right;a++){
-                    for(var b=area.top;b<=area.bottom;b++){
-                        x=a+left;
-                        y=b+top;
-                        if(x>-1 && y>-1 && x<this.stage.rect.width && y<this.stage.rect.height && this.stage.rect.in(a,b)){
-                            var color=Flat3D.Value.getStageColor(colorData,x,y);
-                            if(color.alpha>0){
-                                color.belong=this;
-                                this.stage.matrix[x][y]=color;
+                for (var a = area.left; a <= area.right; a++) {
+                    for (var b = area.top; b <= area.bottom; b++) {
+                        x = a + left;
+                        y = b + top;
+                        if (x > -1 && y > -1 && x < this.stage.rect.width && y < this.stage.rect.height && this.stage.rect.in(a, b)) {
+                            var color = Flat3D.Value.getStageColor(colorData, x, y);
+                            if (color.alpha > 0) {
+                                color.belong = this;
+                                this.stage.matrix[x][y] = color;
                                 /*非空区域
                                 this.stage.canvas.beginPath();
                                 this.stage.canvas.arc(a, b, 1, 0, Math.PI * 2);
@@ -433,25 +430,10 @@ var Flat3D = {
                         }
                     }
                 }
-                colorData=null;
+                colorData = null;
             },
-            setTexture: function (url, moveToCenter, loadComplete) {
-                var thing = this;
-                var img = new Image();
-                img.src = url;
-                thing.texture.imgCanDraw = false;
-                img.onload = function () {
-                    thing.texture.imgCanDraw = true;
-                    if (moveToCenter) {
-                        thing.texture.transform.translate = {
-                            x: -this.width / 2,
-                            y: -this.height / 2,
-                        }
-                    }
-                    if (loadComplete) loadComplete(thing, this);
-                }
-                this.texture.img = img;
-                return this.texture.img;
+            setTexture: function (texture) {
+                this.texture = texture;
             },
             notifyEffectSet: function () {
                 var n = this.effectSet.length;
@@ -570,12 +552,12 @@ var Flat3D = {
         },
         getStageColor: function (colorData, x, y) {
             var data = colorData;
-            var i=(data.width*y+x)*4;
+            var i = (data.width * y + x) * 4;
             var color = {
                 red: data.data[i],
-                green: data.data[i+1],
-                blue: data.data[i+2],
-                alpha: data.data[i+3],
+                green: data.data[i + 1],
+                blue: data.data[i + 2],
+                alpha: data.data[i + 3],
             };
             return color;
         }
@@ -623,7 +605,7 @@ var Flat3D = {
                         var keys = Object.keys(ani.effectParams);
                         for (var a = 0; a < keys.length; a++) {
                             var value = Flat3D.Value.getValue(ani.thing, keys[a]);
-                            value = ani.effectParams[keys[a]](value);
+                            value = ani.effectParams[keys[a]](value,ani);
                             Flat3D.Value.setValue(ani.thing, keys[a], value);
                         }
                     }
@@ -640,7 +622,7 @@ var Flat3D = {
                 thing: target,
                 completedCallBack: _completedCallBack,
                 effectParamKey: paramKey,
-                Ease: valueEase,
+                ease: valueEase,
                 start: function () {
                     this._ease.d = this._ease.end - this._ease.start;
                     this.status = 1;
@@ -676,8 +658,8 @@ var Flat3D = {
                         ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK;
                         if (ani.tick > ani.finalTick) ani.tick = ani.finalTick;
                         var value = Flat3D.Value.getValue(ani.thing, ani.effectParamKey);
-                        if (ani.Ease) {
-                            value = ani.Ease(ani.tick, ani._ease.start, ani._ease.d, ani.finalTick);
+                        if (ani.ease) {
+                            value = ani.ease(ani.tick, ani._ease.start, ani._ease.d, ani.finalTick);
                             if ((value - ani._ease.end) * ani._ease.vd > 0) {
                                 value = ani._ease.end;
                                 ani.stop();
@@ -700,19 +682,19 @@ var Flat3D = {
              * 单位化向量
              */
             unit: function () {
-                var d = this.distance();
+                var d = this.getDistance();
                 return new Flat3D.Vector(this.x / d, this.y / d, this.z / d);
             },
             /**
              * 获取向量距离（大小）
              */
-            distance: function () {
+            getDistance: function () {
                 return Math.pow(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2), 0.5);
             },
             /**
              * 返回数组格式坐标
              */
-            array: function () {
+            getArray: function () {
                 return [this.x, this.y, this.z];
             }
         };

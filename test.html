@@ -28,19 +28,19 @@
         thing.click=function(e){
             console.log("click logo");
         }
-        thing.setTexture("./logo.png",true);
+        thing.setTexture(new Flat3D.Texture(thing,"./logo.png",true));
         //thing.texture.position.x=100;
         thing.texture.transform.rotate.center={x:0,y:0};
         thing.texture.transform.rotate.angle=0;
         thing.texture.transform.scale={scaleWidth:0.8,scaleHeight:0.8};
         container.setThing(thing);
         var thing2=new Flat3D.Contain.Thing(stage);
-        thing2.setTexture("./logo.png",true);
+        thing2.setTexture(new Flat3D.Texture(thing2,"./logo.png",true));
         thing2.texture.position={x:100,y:50};
         thing2.texture.transform.scale={scaleWidth:0.5,scaleHeight:0.5};
         container.setThing(thing2);
         var thing3=new Flat3D.Thing(stage,new Flat3D.Point(-100,100,0));
-        thing3.setTexture("./profile.png",true);
+        thing3.setTexture(new Flat3D.Texture(thing3,"./profile.png",true));
         thing3.texture.transform.scale={scaleWidth:0.6,scaleHeight:0.6};
         thing3.click=function(e){
             console.log("click profile logo");
