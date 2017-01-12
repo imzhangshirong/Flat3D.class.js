@@ -1,0 +1,165 @@
+<!DOCTYPE>
+<html>
+
+<head>
+    <script src="../Flat3D.class.js?a"></script>
+    <style>
+            canvas{background-color:gray}
+        </style>
+</head>
+
+<body>
+    <canvas id="StageCanvas">Your Browser don't support canvas</canvas>
+    <a href="javascript:stage.start()">start</a>
+    <a href="javascript:stage.pause()">pause</a>
+    <a href="javascript:stage.updateStage()">updateStage</a>
+    <a href="javascript:stage.updateMatrix()">updateMatrix</a>
+</body>
+<script>
+        var Modle_Texture = {
+            body: { src: "./texture_body.png" },
+            body_bottom: { src: "./texture_bodyb.png" },
+            arm_left_top: { src: "./texture_armtl.png" },
+            arm_left_bottom: { src: "./texture_armbl.png" },
+            arm_right_top: { src: "./texture_armtr.png" },
+            arm_right_bottom: { src: "./texture_armbr.png" },
+            leg_left_top: { src: "./texture_legtl.png" },
+            leg_left_bottom: { src: "./texture_legbl.png" },
+            leg_right_top: { src: "./texture_legtr.png" },
+            leg_right_bottom: { src: "./texture_legbr.png" },
+        }
+        Flat3D.Resource.loadTextureSet(Modle_Texture, function (cur, all) {
+            if (cur == all) {
+                init();
+            }
+        })
+        function init() {
+            Flat3D.Config.DEBUG_MODE = true;
+            var SCALE = 0.6;
+            var ele = document.getElementById("StageCanvas");
+            var stage = new Flat3D.Stage();
+            stage.setFPS(60);
+            stage.tickSpeed = 1;
+            stage.bindCanvas(ele, 900, 800);
+            console.log(stage);
+
+            //左手
+            var m_left_arm = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
+            var m_left_armb = new Flat3D.Contain.Thing(stage);
+            var m_left_armt = new Flat3D.Contain.Thing(stage);
+            m_left_armt.texture.setImage(Modle_Texture.arm_left_top.image, false, function (thing, texture, image) {
+                m_left_armb.texture.position.y = (image.height - 32);
+                m_left_arm.transform.rotate.center.x = 72;
+                m_left_arm.transform.rotate.center.y = 20;
+            });
+            m_left_armb.texture.setImage(Modle_Texture.arm_left_bottom.image, false, function (thing, texture, image) {
+                texture.position.x = (-image.width + 48);
+                texture.transform.rotate.center.x = 85;
+                texture.transform.rotate.center.y = 16;
+            });
+            //右手
+            var m_right_arm = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
+            var m_right_armb = new Flat3D.Contain.Thing(stage);
+            var m_right_armt = new Flat3D.Contain.Thing(stage);
+            m_right_armt.texture.setImage(Modle_Texture.arm_right_top.image, false, function (thing, texture, image) {
+                m_right_armb.texture.position.y = (image.height - 32);
+                m_right_arm.transform.rotate.center.x = image.width - 72;
+                m_right_arm.transform.rotate.center.y = 20;
+            });
+            m_right_armb.texture.setImage(Modle_Texture.arm_right_bottom.image, false, function (thing, texture, image) {
+                texture.position.x = (48);
+                texture.transform.rotate.center.x = image.width - 85;
+                texture.transform.rotate.center.y = 16;
+            });
+
+            //左脚
+            var m_left_leg = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
+            var m_left_legb = new Flat3D.Contain.Thing(stage);
+            var m_left_legt = new Flat3D.Contain.Thing(stage);
+            m_left_legt.texture.setImage(Modle_Texture.leg_left_top.image, false, function (thing, texture, image) {
+                m_left_legb.texture.position.y = (image.height - 44);
+                m_left_leg.transform.rotate.center.x = 40;
+                m_left_leg.transform.rotate.center.y = 30;
+            });
+            m_left_legb.texture.setImage(Modle_Texture.leg_left_bottom.image, false, function (thing, texture, image) {
+                texture.position.x = (-image.width+60);
+                texture.transform.rotate.center.x = 38;
+                texture.transform.rotate.center.y = 24;
+            });
+            //右脚
+            var m_right_leg = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
+            var m_right_legb = new Flat3D.Contain.Thing(stage);
+            var m_right_legt = new Flat3D.Contain.Thing(stage);
+            m_right_legt.texture.setImage(Modle_Texture.leg_right_top.image, false, function (thing, texture, image) {
+                m_right_legb.texture.position.y = (image.height - 44);
+                m_right_leg.transform.rotate.center.x = image.width - 40;
+                m_right_leg.transform.rotate.center.y = 30;
+            });
+            m_right_legb.texture.setImage(Modle_Texture.leg_right_bottom.image, false, function (thing, texture, image) {
+                texture.position.x = Modle_Texture.leg_right_top.image.width-60;
+                texture.transform.rotate.center.x = image.width-38;
+                texture.transform.rotate.center.y = 24;
+            });
+
+
+
+            //上半身
+            var m_body = new Flat3D.Thing(stage, new Flat3D.Point(0, 0, 0));
+            m_body.texture.setImage(Modle_Texture.body.image, true, function (thing, texture, image) {
+                m_left_arm.position = new Flat3D.Point(-(24+Modle_Texture.arm_left_top.image.width), (image.height / 2 - 20), -1);
+                m_right_arm.position = new Flat3D.Point(24, (image.height / 2 - 20), -1);
+            });
+            //下半身
+            var m_body_bottom = new Flat3D.Thing(stage, new Flat3D.Point(0, -100, 0));
+            m_body_bottom.texture.setImage(Modle_Texture.body_bottom.image, true, function (thing, texture, image) {
+                m_left_leg.position = new Flat3D.Point(-(20+Modle_Texture.leg_left_top.image.width), -(image.height), -1);
+                m_right_leg.position = new Flat3D.Point(20, -(image.height), -1);
+            });
+
+            m_body.click = function (e) {
+                console.log("click body");
+            }
+            m_left_armt.click = function (e) {
+                console.log("click arm_left_top");
+            }
+            m_left_armb.click = function (e) {
+                console.log("click arm_left_bottom");
+            }
+            m_right_armt.click = function (e) {
+                console.log("click arm_right_top");
+            }
+            m_right_armb.click = function (e) {
+                console.log("click arm_right_bottom");
+            }
+
+
+            m_left_arm.setThing(m_left_armt);
+            m_left_arm.setThing(m_left_armb);
+            stage.setThing(m_left_arm);
+            m_right_arm.setThing(m_right_armt);
+            m_right_arm.setThing(m_right_armb);
+            stage.setThing(m_right_arm);
+            
+            
+            m_left_leg.setThing(m_left_legb);
+            m_left_leg.setThing(m_left_legt);
+            stage.setThing(m_left_leg);
+
+            m_right_leg.setThing(m_right_legb);
+            m_right_leg.setThing(m_right_legt);
+            stage.setThing(m_right_leg);
+            
+            stage.setThing(m_body_bottom);
+            stage.setThing(m_body);
+
+            stage.start();
+
+
+            m_left_arm.setFrameAnimationByParamKey("transform.rotate.angle",0,40,Flat3D.Ease.Linear,3000).start();
+            m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,90,Flat3D.Ease.Linear,3000).start();
+            m_left_legb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Linear,3000).start();
+        }
+
+    </script>
+
+</html>
