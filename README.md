@@ -67,16 +67,19 @@
 - Flat3D.Texture.image > Image
 - Flat3D.Texture.position > {x:float, y:float}
 - Flat3D.Texture.transform > Flat3D.Tranform
-- Flat3D.Texture.setImage(url[, moveToCenter, loadComplete])
+- Flat3D.Texture.setImage(image[, moveToCenter, loadComplete])
+- Flat3D.Texture.setImageURL(url[, moveToCenter, loadComplete])
 
+### 8. Flat3D.Texture：物体资源类
+- Flat3D.Resource.loadTextureSet(textureSet,process)
 
-### 8. Flat3D.Transform：变换类
+### 9. Flat3D.Transform：变换类
 - Flat3D.Transform()
 - Flat3D.Transform.translate > {x:float, y:float}
 - Flat3D.Transform.scale > {scaleWidth:float, scaleHeight:float}
 - Flat3D.Transform.rotate > {center:{x:float, y:float}, angle:float}
 
-### 9. Flat3D.Animation.FrameByParamsFunc：动画(自定义方法处理，{"变量":function(value,ani){//..}})类
+### 10. Flat3D.Animation.FrameByParamsFunc：动画(自定义方法处理，{"变量":function(value,ani){//..}})类
 - Flat3D.Animation.FrameByParamsFunc()
 - Flat3D.Animation.FrameByParamsFunc.thing
 - Flat3D.Animation.FrameByParamsFunc.status
@@ -93,7 +96,7 @@
 - Flat3D.Animation.FrameByParamsFunc.timer
 - Flat3D.Animation.FrameByParamsFunc.destroy()
 
-### 10. Flat3D.Animation.FrameByParamKey：动画(预设缓动处理)类
+### 11. Flat3D.Animation.FrameByParamKey：动画(预设缓动处理)类
 - Flat3D.Animation.FrameByParamKey()
 - Flat3D.Animation.FrameByParamKey.thing
 - Flat3D.Animation.FrameByParamKey.status
@@ -111,18 +114,18 @@
 - Flat3D.Animation.FrameByParamKey.timer
 - Flat3D.Animation.FrameByParamKey.destroy()
 
-### 11. Flat3D.Coordinate：坐标转换类
+### 12. Flat3D.Coordinate：坐标转换类
 - Flat3D.Coordinate.PId180 > PI/180
 - Flat3D.Coordinate.point3DTo2D(point, camera)
 - Flat3D.Coordinate.sphrToRect(angleA, angleB, r)
 
-### 12. Flat3D.Value：赋值取值类
+### 13. Flat3D.Value：赋值取值类
 - Flat3D.Value.getValue(obj, key)
 - Flat3D.Value.setValue(obj, key, newValue)
 - Flat3D.Value.getStageColor(colorData, x, y)
 
 
-### 13. Flat3D.Point：三维坐标类
+### 14. Flat3D.Point：三维坐标类
 - Flat3D.Point(x,y,z)
 - Flat3D.Point.x
 - Flat3D.Point.y
@@ -131,7 +134,7 @@
 - Flat3D.Point.add(target)
 - Flat3D.Point.sub(target)
 
-### 14. Flat3D.Vector：三维向量类
+### 15. Flat3D.Vector：三维向量类
 - Flat3D.Vector
 - Flat3D.Vector.x
 - Flat3D.Vector.y
@@ -140,16 +143,16 @@
 - Flat3D.Vector.getDistance
 - Flat3D.Vector.getArray
 
-### 15. Flat3D.Rect：二维矩形类
+### 16. Flat3D.Rect：二维矩形类
 - Flat3D.Rect.create(left, top, right, bottom)
 - Flat3D.Rect.createFromSize(left, top, width, height)
 - Flat3D.Rect.createFromSizeCenter(centerLeft, centerTop, width, height)
 
 
-### 16. Flat3D.Matrix：舞台点矩阵类
+### 17. Flat3D.Matrix：舞台点矩阵类
 - Flat3D.Matrix(width, height)
 
-### 17. Flat3D.Ease：动画缓动类
+### 18. Flat3D.Ease：动画缓动类
 - Flat3D.Ease.Linear(t, b, c, d)
 - Flat3D.Ease.Quad.easeIn/easeOut/easeInOut(t, b, c, d)
 - Flat3D.Ease.Cubic.easeIn/easeOut/easeInOut(t, b, c, d)
