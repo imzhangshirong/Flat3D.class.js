@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <script src="../Flat3D.class.js?a"></script>
+    <script src="../Flat3D.class.js?b"></script>
     <style>
             canvas{background-color:gray}
         </style>
@@ -17,6 +17,39 @@
 </body>
 <script>
         var Modle_Texture = {
+            head_hair_background:{src:"./texture_hairb.png"},
+            head_hair_top:{src:"./texture_hairt.png"},
+            head_hair_ex0:{src:"./texture_hair_ex0.png"},
+            head_hair_ex1:{src:"./texture_hair_ex1.png"},
+            head_hair_left:{src:"./texture_hairl.png"},
+            head_hair_right:{src:"./texture_hairr.png"},
+            head_face:{src:"./texture_face.png"},
+            head_eyebrow_left:{src:"./texture_eyebrowl.png"},
+            head_eyebrow_right:{src:"./texture_eyebrowr.png"},
+            head_eyet0_left:{src:"./texture_eyet0l.png"},
+            head_eyet0_right:{src:"./texture_eyet0r.png"},
+            head_eyet1_left:{src:"./texture_eyet1l.png"},
+            head_eyet1_right:{src:"./texture_eyet1r.png"},
+            head_eyet2_left:{src:"./texture_eyet2l.png"},
+            head_eyet2_right:{src:"./texture_eyet2r.png"},
+            head_eyet3_left:{src:"./texture_eyet3l.png"},
+            head_eyet3_right:{src:"./texture_eyet3r.png"},
+            head_eyet4_left:{src:"./texture_eyet4l.png"},
+            head_eyet4_right:{src:"./texture_eyet4r.png"},
+            head_eyet5_left:{src:"./texture_eyet5l.png"},
+            head_eyet5_right:{src:"./texture_eyet5r.png"},
+            head_eyet6_left:{src:"./texture_eyet6l.png"},
+            head_eyet6_right:{src:"./texture_eyet6r.png"},
+            head_eyet7_left:{src:"./texture_eyet7l.png"},
+            head_eyet7_right:{src:"./texture_eyet7r.png"},
+            head_eyet8_left:{src:"./texture_eyet8l.png"},
+            head_eyet8_right:{src:"./texture_eyet8r.png"},
+            head_eyet9_left:{src:"./texture_eyet9.png"},
+            head_eyet9_right:{src:"./texture_eyet9.png"},
+            head_facered_left:{src:"./texture_faceredl.png"},
+            head_facered_right:{src:"./texture_faceredr.png"},
+            head_mouth0:{src:"./texture_mouth0.png"},
+            head_neck:{src:"./texture_neck.png"},
             body: { src: "./texture_body.png" },
             body_bottom: { src: "./texture_bodyb.png" },
             arm_left_top: { src: "./texture_armtl.png" },
@@ -35,14 +68,187 @@
         })
         function init() {
             Flat3D.Config.DEBUG_MODE = true;
+            var modle_move={x:0,y:-170};
             var SCALE = 0.6;
             var ele = document.getElementById("StageCanvas");
             var stage = new Flat3D.Stage();
             stage.setFPS(60);
             stage.tickSpeed = 1;
-            stage.bindCanvas(ele, 900, 800);
+            stage.bindCanvas(ele, 600, 1000);
             console.log(stage);
-
+            //头部
+            var m_head_hairb=new Flat3D.Thing(stage);
+            m_head_hairb.texture.setImage(Modle_Texture.head_hair_background.image,true,function(thing,texture,image){
+                texture.transform.translate.y=0;
+            });
+            var m_head_hair_ex0=new Flat3D.Thing(stage,new Flat3D.Point(0,0,0));
+            m_head_hair_ex0.texture.setImage(Modle_Texture.head_hair_ex0.image,true,function(thing,texture,image){
+                texture.transform.translate.y=0;
+                texture.transform.translate.x+=16;
+            });
+            var m_head_f=new Flat3D.Contain.Container(stage,new Flat3D.Point(0,0,0));
+            var m_head_before=new Flat3D.Contain.Container(stage,new Flat3D.Point(0,0,0));
+            var m_head_hairt=new Flat3D.Contain.Thing(stage);
+            
+            var m_head_hair_ex1=new Flat3D.Contain.Thing(stage);
+            var m_head_hairl=new Flat3D.Contain.Thing(stage);
+            var m_head_hairr=new Flat3D.Contain.Thing(stage);
+            var m_head_face=new Flat3D.Contain.Thing(stage);
+            var m_head_eyebrowl=new Flat3D.Contain.Thing(stage);
+            var m_head_eyebrowr=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet0l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet0r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet1l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet1r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet2l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet2r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet3l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet3r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet4l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet4r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet5l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet5r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet6l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet6r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet7l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet7r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet8l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet8r=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet9l=new Flat3D.Contain.Thing(stage);
+            var m_head_eyet9r=new Flat3D.Contain.Thing(stage);
+            var m_head_faceredl=new Flat3D.Contain.Thing(stage);
+            var m_head_faceredr=new Flat3D.Contain.Thing(stage);
+            var m_head_mouth0=new Flat3D.Contain.Thing(stage);
+            m_head_hairt.texture.setImage(Modle_Texture.head_hair_top.image,true,function(thing,texture,image){
+                texture.transform.translate.y=0;
+                texture.transform.translate.x+=2;
+            });
+            
+            m_head_hair_ex1.texture.setImage(Modle_Texture.head_hair_ex1.image,true,function(thing,texture,image){
+                texture.position.y=200;
+                texture.position.x=-160;
+            });
+            m_head_hairl.texture.setImage(Modle_Texture.head_hair_left.image,false,function(thing,texture,image){
+                texture.transform.translate.y=30;
+                texture.position.x=-image.width-63;
+            });
+            m_head_hairr.texture.setImage(Modle_Texture.head_hair_right.image,false,function(thing,texture,image){
+                texture.transform.translate.y=40;
+                texture.position.x=45;
+                
+            });
+            m_head_face.texture.setImage(Modle_Texture.head_face.image,true,function(thing,texture,image){
+                texture.transform.translate.y=22;
+            });
+            var m_neck=new Flat3D.Thing(stage);
+            m_neck.texture.setImage(Modle_Texture.head_neck.image,true,function(thing,texture,image){
+                texture.transform.translate.x+=4;
+                texture.transform.translate.y=0;
+            });
+            m_head_eyebrowl.texture.setImage(Modle_Texture.head_eyebrow_left.image,true,function(thing,texture,image){
+                texture.position.y=200;
+                texture.position.x=-70;
+                texture.transform.rotate.angle=8;
+                
+            });
+            m_head_eyebrowr.texture.setImage(Modle_Texture.head_eyebrow_right.image,true,function(thing,texture,image){
+                texture.position.y=200;
+                texture.position.x=70;
+                texture.transform.rotate.angle=-8;
+                
+            });
+            m_head_eyet0l.texture.setImage(Modle_Texture.head_eyet0_left.image,true,function(thing,texture,image){
+                texture.position.y=220;
+                texture.position.x=-60;
+            });
+            m_head_eyet0r.texture.setImage(Modle_Texture.head_eyet0_right.image,true,function(thing,texture,image){
+                texture.position.y=220;
+                texture.position.x=60;
+            });
+            m_head_eyet1l.texture.setImage(Modle_Texture.head_eyet1_left.image,true,function(thing,texture,image){
+                texture.position.y=220;
+                texture.position.x=-70;
+            });
+            m_head_eyet1r.texture.setImage(Modle_Texture.head_eyet1_right.image,true,function(thing,texture,image){
+                texture.position.y=220;
+                texture.position.x=70;
+            });
+            m_head_eyet2l.texture.setImage(Modle_Texture.head_eyet2_left.image,true,function(thing,texture,image){
+                texture.position.y=220;
+                texture.position.x=-70;
+            });
+            m_head_eyet2r.texture.setImage(Modle_Texture.head_eyet2_right.image,true,function(thing,texture,image){
+                //texture.transform.translate.x+=10;
+                texture.position.y=220;
+                texture.position.x=70+14;
+            });
+            m_head_eyet3l.texture.setImage(Modle_Texture.head_eyet3_left.image,true,function(thing,texture,image){
+                texture.position.y=245;
+                texture.position.x=-75;
+            });
+            m_head_eyet3r.texture.setImage(Modle_Texture.head_eyet3_right.image,true,function(thing,texture,image){
+                texture.position.y=245;
+                texture.position.x=75;
+            });
+            m_head_eyet4l.texture.setImage(Modle_Texture.head_eyet4_left.image,true,function(thing,texture,image){
+                texture.position.y=275;
+                texture.position.x=70;
+            });
+            m_head_eyet4r.texture.setImage(Modle_Texture.head_eyet4_right.image,true,function(thing,texture,image){
+                texture.position.y=275;
+                texture.position.x=-70;
+            });
+            m_head_eyet5l.texture.setImage(Modle_Texture.head_eyet5_left.image,true,function(thing,texture,image){
+                texture.position.y=275;
+                texture.position.x=-110;
+            });
+            m_head_eyet5r.texture.setImage(Modle_Texture.head_eyet5_right.image,true,function(thing,texture,image){
+                texture.position.y=275;
+                texture.position.x=110;
+            });
+            m_head_eyet6l.texture.setImage(Modle_Texture.head_eyet6_left.image,true,function(thing,texture,image){
+                texture.position.y=318;
+                texture.position.x=-70;
+            });
+            m_head_eyet6r.texture.setImage(Modle_Texture.head_eyet6_right.image,true,function(thing,texture,image){
+                texture.position.y=318;
+                texture.position.x=70;
+            });
+            m_head_eyet7l.texture.setImage(Modle_Texture.head_eyet7_left.image,true,function(thing,texture,image){
+                texture.position.y=322;
+                texture.position.x=-70;
+            });
+            m_head_eyet7r.texture.setImage(Modle_Texture.head_eyet7_right.image,true,function(thing,texture,image){
+                texture.position.y=322;
+                texture.position.x=70;
+            });
+            m_head_eyet8l.texture.setImage(Modle_Texture.head_eyet8_left.image,true,function(thing,texture,image){
+                texture.position.y=280;
+                texture.position.x=-70;
+            });
+            m_head_eyet8r.texture.setImage(Modle_Texture.head_eyet8_right.image,true,function(thing,texture,image){
+                texture.position.y=280;
+                texture.position.x=70;
+            });
+            m_head_eyet9l.texture.setImage(Modle_Texture.head_eyet9_left.image,true,function(thing,texture,image){
+                texture.position.y=265;
+                texture.position.x=-90;
+            });
+            m_head_eyet9r.texture.setImage(Modle_Texture.head_eyet9_right.image,true,function(thing,texture,image){
+                texture.position.y=265;
+                texture.position.x=50;
+            });
+            m_head_faceredl.texture.setImage(Modle_Texture.head_facered_left.image,true,function(thing,texture,image){
+                texture.position.y=328;
+                texture.position.x=-90;
+            });
+            m_head_faceredr.texture.setImage(Modle_Texture.head_facered_right.image,true,function(thing,texture,image){
+                texture.position.y=328;
+                texture.position.x=90;
+            });
+            m_head_mouth0.texture.setImage(Modle_Texture.head_mouth0.image,true,function(thing,texture,image){
+                texture.position.y=350;
+            });
             //左手
             var m_left_arm = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
             var m_left_armb = new Flat3D.Contain.Thing(stage);
@@ -100,20 +306,26 @@
                 texture.transform.rotate.center.x = image.width-38;
                 texture.transform.rotate.center.y = 24;
             });
+            
 
 
 
             //上半身
-            var m_body = new Flat3D.Thing(stage, new Flat3D.Point(0, 0, 0));
+            var m_body = new Flat3D.Thing(stage, new Flat3D.Point(0+modle_move.x, 0+modle_move.y, 0));
             m_body.texture.setImage(Modle_Texture.body.image, true, function (thing, texture, image) {
-                m_left_arm.position = new Flat3D.Point(-(24+Modle_Texture.arm_left_top.image.width), (image.height / 2 - 20), -1);
-                m_right_arm.position = new Flat3D.Point(24, (image.height / 2 - 20), -1);
+                m_left_arm.position = new Flat3D.Point(-(24+Modle_Texture.arm_left_top.image.width)+modle_move.x, (image.height / 2 - 20)+modle_move.y, -1);
+                m_right_arm.position = new Flat3D.Point(24+modle_move.x, (image.height / 2 - 20)+modle_move.y, -1);
+                m_head_hairb.position=new Flat3D.Point(0+modle_move.x,512+modle_move.y,-2);
+                m_head_hair_ex0.position=new Flat3D.Point(0+modle_move.x,620+modle_move.y,-1);
+                m_head_f.position=new Flat3D.Point(0+modle_move.x,510+modle_move.y,0);
+                m_head_before.position=new Flat3D.Point(0+modle_move.x,510+modle_move.y,1);
+                m_neck.position=new Flat3D.Point(0+modle_move.x,180+modle_move.y,0);
             });
             //下半身
-            var m_body_bottom = new Flat3D.Thing(stage, new Flat3D.Point(0, -100, 0));
+            var m_body_bottom = new Flat3D.Thing(stage, new Flat3D.Point(0+modle_move.x, -100+modle_move.y, 0));
             m_body_bottom.texture.setImage(Modle_Texture.body_bottom.image, true, function (thing, texture, image) {
-                m_left_leg.position = new Flat3D.Point(-(20+Modle_Texture.leg_left_top.image.width), -(image.height), -1);
-                m_right_leg.position = new Flat3D.Point(20, -(image.height), -1);
+                m_left_leg.position = new Flat3D.Point(-(20+Modle_Texture.leg_left_top.image.width)+modle_move.x, -(image.height)+modle_move.y, -1);
+                m_right_leg.position = new Flat3D.Point(20+modle_move.x, -(image.height)+modle_move.y, -1);
             });
 
             m_body.click = function (e) {
@@ -132,6 +344,47 @@
                 console.log("click arm_right_bottom");
             }
 
+
+
+            
+            stage.setThing(m_head_hairb);
+            stage.setThing(m_head_hair_ex0);
+            stage.setThing(m_neck);
+            m_head_f.setThing(m_head_face);
+            
+            m_head_f.setThing(m_head_eyet1l);
+            m_head_f.setThing(m_head_eyet1r);
+            m_head_f.setThing(m_head_eyebrowl);
+            m_head_f.setThing(m_head_eyebrowr);
+            m_head_f.setThing(m_head_eyet0l);
+            m_head_f.setThing(m_head_eyet0r);
+           
+            m_head_f.setThing(m_head_eyet8l);
+            m_head_f.setThing(m_head_eyet8r);
+            m_head_f.setThing(m_head_eyet5l);
+            m_head_f.setThing(m_head_eyet5r);
+            m_head_f.setThing(m_head_eyet4l);
+            m_head_f.setThing(m_head_eyet4r);
+            m_head_f.setThing(m_head_eyet9l);
+            m_head_f.setThing(m_head_eyet9r);
+            m_head_f.setThing(m_head_eyet7l);
+            m_head_f.setThing(m_head_eyet7r);
+            m_head_f.setThing(m_head_eyet3l);
+            m_head_f.setThing(m_head_eyet3r);
+            m_head_f.setThing(m_head_eyet6l);
+            m_head_f.setThing(m_head_eyet6r);
+            m_head_f.setThing(m_head_eyet2l);
+            m_head_f.setThing(m_head_eyet2r);
+            m_head_f.setThing(m_head_faceredl);
+            m_head_f.setThing(m_head_faceredr);
+            m_head_f.setThing(m_head_mouth0);
+            stage.setThing(m_head_f);
+
+            m_head_before.setThing(m_head_hairl);
+            m_head_before.setThing(m_head_hairr);
+            m_head_before.setThing(m_head_hairt);
+            m_head_before.setThing(m_head_hair_ex1);
+            stage.setThing(m_head_before);
 
             m_left_arm.setThing(m_left_armt);
             m_left_arm.setThing(m_left_armb);
@@ -155,9 +408,10 @@
             stage.start();
 
 
-            m_left_arm.setFrameAnimationByParamKey("transform.rotate.angle",0,40,Flat3D.Ease.Linear,3000).start();
-            m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,90,Flat3D.Ease.Linear,3000).start();
-            m_left_legb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Linear,3000).start();
+            m_left_arm.setFrameAnimationByParamKey("transform.rotate.angle",0,40,Flat3D.Ease.Quad.easeInOut,1000).start();
+            m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,90,Flat3D.Ease.Quad.easeInOut,1000).start();
+            m_left_legb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,500).start();
+            m_left_leg.setFrameAnimationByParamKey("transform.rotate.angle",0,5,Flat3D.Ease.Quad.easeInOut,500).start();
         }
 
     </script>

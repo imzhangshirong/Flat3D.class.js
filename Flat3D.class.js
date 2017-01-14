@@ -8,7 +8,7 @@ var Flat3D = {
     Stage: function () {
         var stage = {
             things: [],
-            camera: new Flat3D.Camera(new Flat3D.Point(0, 0, 0), 0, 90, 100),
+            camera: new Flat3D.Camera(new Flat3D.Point(0, 0, 0), 0, 90, 1000),
             status: 2,
             tick: 0,
             rect: undefined,
@@ -32,7 +32,7 @@ var Flat3D = {
                     }
                 }, false);
                 this.rect = new Flat3D.Rect.createFromSizeCenter(0, 0, width, height);
-                this.camera = new Flat3D.Camera(new Flat3D.Point(0, 0, 100), 180, 90, 100);
+                this.camera = new Flat3D.Camera(new Flat3D.Point(0, 0, 1000), 180, 90, 1000);
                 this.canvas = canvasElement.getContext("2d");
                 //console.log(this.rect);
                 this.canvas.translate(-this.rect.left, -this.rect.top);
