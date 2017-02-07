@@ -1,5 +1,5 @@
 ﻿# Flat3D.class.js
-## 一个由平面组成的3D视差舞台，全Canvas绘制
+## 一个由平面组成的3D视差舞台，全Canvas绘制，仿live2d
 
 ## 类说明：
 ### 1. Flat3D.Config：配置
