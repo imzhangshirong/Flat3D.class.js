@@ -53,6 +53,7 @@
 - Flat3D.Thing.setAnimation()
 - Flat3D.Thing.removeAnimation()
 - Flat3D.Thing.destroy()
+- Flat3D.Thing.destroyAllAnimation()
 
 ### 5. Flat3D.Contain.Container：容器类，父类：Flat3D.Thing
 - Flat3D.Contain.Container()
