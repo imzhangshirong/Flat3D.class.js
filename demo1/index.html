@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <script src="../Flat3D.class.js?b"></script>
+    <script src="../Flat3D.class.js?b=6"></script>
     <style>
             canvas{background-color:gray}
         </style>
@@ -10,10 +10,11 @@
 
 <body>
     <canvas id="StageCanvas">Your Browser don't support canvas</canvas>
-    <a href="javascript:stage.start()">start</a>
-    <a href="javascript:stage.pause()">pause</a>
-    <a href="javascript:stage.updateStage()">updateStage</a>
-    <a href="javascript:stage.updateMatrix()">updateMatrix</a>
+    <div>
+        <a href="#" id="start">start</a>
+        <a href="#" id="pause">pause</a>
+        <a href="#" id="wave">wave hand</a>
+    </div>
 </body>
 <script>
         var Modle_Texture = {
@@ -65,29 +66,33 @@
             if (cur == all) {
                 init();
             }
-        })
+        });
+        var stage = new Flat3D.Stage();
         function init() {
             Flat3D.Config.DEBUG_MODE = true;
-            var modle_move={x:0,y:-170};
+            var modle_move={x:0,y:0};
             var SCALE = 0.6;
             var ele = document.getElementById("StageCanvas");
-            var stage = new Flat3D.Stage();
+            
+            
             stage.setFPS(60);
             stage.tickSpeed = 1;
             stage.bindCanvas(ele, 600, 1000);
             console.log(stage);
             //头部
-            var m_head_hairb=new Flat3D.Thing(stage);
+            var m_head_hairb=new Flat3D.Thing(stage,new Flat3D.Point(0+modle_move.x,14+modle_move.y,-5));
             m_head_hairb.texture.setImage(Modle_Texture.head_hair_background.image,true,function(thing,texture,image){
-                texture.transform.translate.y=0;
+                texture.transform.translate.y=-340;
             });
-            var m_head_hair_ex0=new Flat3D.Thing(stage,new Flat3D.Point(0,0,0));
+            /*var m_head_hair_ex0=new Flat3D.Thing(stage,new Flat3D.Point(0,344,-2));
             m_head_hair_ex0.texture.setImage(Modle_Texture.head_hair_ex0.image,true,function(thing,texture,image){
-                texture.transform.translate.y=0;
-                texture.transform.translate.x+=16;
-            });
-            var m_head_f=new Flat3D.Contain.Container(stage,new Flat3D.Point(0,0,0));
-            var m_head_before=new Flat3D.Contain.Container(stage,new Flat3D.Point(0,0,0));
+                texture.transform.translate.y=-image.height;
+                texture.transform.translate.x+=24;
+            });*/
+            var m_head_f=new Flat3D.Contain.Container(stage,new Flat3D.Point(0+modle_move.x,14+modle_move.y,3));
+            m_head_f.transform.translate.y=-340;
+            var m_head_before=new Flat3D.Contain.Container(stage,new Flat3D.Point(0+modle_move.x,14+modle_move.y,4));
+            m_head_before.transform.translate.y=-340;
             var m_head_hairt=new Flat3D.Contain.Thing(stage);
             
             var m_head_hair_ex1=new Flat3D.Contain.Thing(stage);
@@ -119,6 +124,11 @@
             var m_head_faceredl=new Flat3D.Contain.Thing(stage);
             var m_head_faceredr=new Flat3D.Contain.Thing(stage);
             var m_head_mouth0=new Flat3D.Contain.Thing(stage);
+            var m_head_hair_ex0=new Flat3D.Contain.Thing(stage);
+            m_head_hair_ex0.texture.setImage(Modle_Texture.head_hair_ex0.image,true,function(thing,texture,image){
+                texture.transform.translate.y=-image.height+10;
+                texture.transform.translate.x+=16;
+            });
             m_head_hairt.texture.setImage(Modle_Texture.head_hair_top.image,true,function(thing,texture,image){
                 texture.transform.translate.y=0;
                 texture.transform.translate.x+=2;
@@ -140,9 +150,9 @@
             m_head_face.texture.setImage(Modle_Texture.head_face.image,true,function(thing,texture,image){
                 texture.transform.translate.y=22;
             });
-            var m_neck=new Flat3D.Thing(stage);
+            var m_neck=new Flat3D.Thing(stage,new Flat3D.Point(0+modle_move.x,16+modle_move.y,0));
             m_neck.texture.setImage(Modle_Texture.head_neck.image,true,function(thing,texture,image){
-                texture.transform.translate.x+=4;
+                texture.transform.translate.x+=0;
                 texture.transform.translate.y=0;
             });
             m_head_eyebrowl.texture.setImage(Modle_Texture.head_eyebrow_left.image,true,function(thing,texture,image){
@@ -207,11 +217,11 @@
                 texture.position.x=110;
             });
             m_head_eyet6l.texture.setImage(Modle_Texture.head_eyet6_left.image,true,function(thing,texture,image){
-                texture.position.y=318;
+                texture.position.y=316;
                 texture.position.x=-70;
             });
             m_head_eyet6r.texture.setImage(Modle_Texture.head_eyet6_right.image,true,function(thing,texture,image){
-                texture.position.y=318;
+                texture.position.y=316;
                 texture.position.x=70;
             });
             m_head_eyet7l.texture.setImage(Modle_Texture.head_eyet7_left.image,true,function(thing,texture,image){
@@ -250,59 +260,67 @@
                 texture.position.y=350;
             });
             //左手
-            var m_left_arm = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
+            var m_left_arm = new Flat3D.Contain.Container(stage, new Flat3D.Point(-56+modle_move.x, -70+modle_move.y, 0));
             var m_left_armb = new Flat3D.Contain.Thing(stage);
             var m_left_armt = new Flat3D.Contain.Thing(stage);
             m_left_armt.texture.setImage(Modle_Texture.arm_left_top.image, false, function (thing, texture, image) {
-                m_left_armb.texture.position.y = (image.height - 32);
-                m_left_arm.transform.rotate.center.x = 72;
-                m_left_arm.transform.rotate.center.y = 20;
+                m_left_armb.texture.position.y = (image.height - 32-20);
+                texture.position.x+=-72;
+                texture.position.y+=-20;
+                texture.transform.rotate.center.x = 72;
+                texture.transform.rotate.center.y = 20;
             });
             m_left_armb.texture.setImage(Modle_Texture.arm_left_bottom.image, false, function (thing, texture, image) {
-                texture.position.x = (-image.width + 48);
+                texture.position.x = (-image.width + 48-72);
                 texture.transform.rotate.center.x = 85;
                 texture.transform.rotate.center.y = 16;
             });
             //右手
-            var m_right_arm = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
+            var m_right_arm = new Flat3D.Contain.Container(stage, new Flat3D.Point(56+modle_move.x, -70+modle_move.y, 0));
             var m_right_armb = new Flat3D.Contain.Thing(stage);
             var m_right_armt = new Flat3D.Contain.Thing(stage);
             m_right_armt.texture.setImage(Modle_Texture.arm_right_top.image, false, function (thing, texture, image) {
-                m_right_armb.texture.position.y = (image.height - 32);
-                m_right_arm.transform.rotate.center.x = image.width - 72;
-                m_right_arm.transform.rotate.center.y = 20;
+                m_right_armb.texture.position.y = (image.height - 32-20);
+                texture.position.x+=72-image.width;
+                texture.position.y+=-20;
+                texture.transform.rotate.center.x = image.width - 72;
+                texture.transform.rotate.center.y = 20;
             });
             m_right_armb.texture.setImage(Modle_Texture.arm_right_bottom.image, false, function (thing, texture, image) {
-                texture.position.x = (48);
+                texture.position.x =Modle_Texture.arm_right_top.image.width-72;
                 texture.transform.rotate.center.x = image.width - 85;
                 texture.transform.rotate.center.y = 16;
             });
 
             //左脚
-            var m_left_leg = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
+            var m_left_leg = new Flat3D.Contain.Container(stage, new Flat3D.Point(-56+modle_move.x, -275+modle_move.y, 0));
             var m_left_legb = new Flat3D.Contain.Thing(stage);
             var m_left_legt = new Flat3D.Contain.Thing(stage);
             m_left_legt.texture.setImage(Modle_Texture.leg_left_top.image, false, function (thing, texture, image) {
-                m_left_legb.texture.position.y = (image.height - 44);
-                m_left_leg.transform.rotate.center.x = 40;
-                m_left_leg.transform.rotate.center.y = 30;
+                m_left_legb.texture.position.y = (image.height - 44-30);
+                texture.position.x+=-40;
+                texture.position.y+=-30;
+                texture.transform.rotate.center.x = 40;
+                texture.transform.rotate.center.y = 30;
             });
             m_left_legb.texture.setImage(Modle_Texture.leg_left_bottom.image, false, function (thing, texture, image) {
-                texture.position.x = (-image.width+60);
+                texture.position.x = (-image.width+60-40);
                 texture.transform.rotate.center.x = 38;
                 texture.transform.rotate.center.y = 24;
             });
             //右脚
-            var m_right_leg = new Flat3D.Contain.Container(stage, new Flat3D.Point(0, 0, 0));
+            var m_right_leg = new Flat3D.Contain.Container(stage, new Flat3D.Point(56+modle_move.x, -275+modle_move.y, 0));
             var m_right_legb = new Flat3D.Contain.Thing(stage);
             var m_right_legt = new Flat3D.Contain.Thing(stage);
             m_right_legt.texture.setImage(Modle_Texture.leg_right_top.image, false, function (thing, texture, image) {
-                m_right_legb.texture.position.y = (image.height - 44);
-                m_right_leg.transform.rotate.center.x = image.width - 40;
-                m_right_leg.transform.rotate.center.y = 30;
+                m_right_legb.texture.position.y = (image.height - 44-30);
+                texture.position.x+= 40-image.width;
+                texture.position.y+=-30;
+                texture.transform.rotate.center.x = image.width-40;
+                texture.transform.rotate.center.y = 30;
             });
             m_right_legb.texture.setImage(Modle_Texture.leg_right_bottom.image, false, function (thing, texture, image) {
-                texture.position.x = Modle_Texture.leg_right_top.image.width-60;
+                texture.position.x = Modle_Texture.leg_right_top.image.width-60-40;
                 texture.transform.rotate.center.x = image.width-38;
                 texture.transform.rotate.center.y = 24;
             });
@@ -311,21 +329,16 @@
 
 
             //上半身
-            var m_body = new Flat3D.Thing(stage, new Flat3D.Point(0+modle_move.x, 0+modle_move.y, 0));
+            var m_body = new Flat3D.Thing(stage, new Flat3D.Point(0+modle_move.x, -170+modle_move.y, 2));
             m_body.texture.setImage(Modle_Texture.body.image, true, function (thing, texture, image) {
-                m_left_arm.position = new Flat3D.Point(-(24+Modle_Texture.arm_left_top.image.width)+modle_move.x, (image.height / 2 - 20)+modle_move.y, -1);
-                m_right_arm.position = new Flat3D.Point(24+modle_move.x, (image.height / 2 - 20)+modle_move.y, -1);
-                m_head_hairb.position=new Flat3D.Point(0+modle_move.x,512+modle_move.y,-2);
-                m_head_hair_ex0.position=new Flat3D.Point(0+modle_move.x,620+modle_move.y,-1);
-                m_head_f.position=new Flat3D.Point(0+modle_move.x,510+modle_move.y,0);
-                m_head_before.position=new Flat3D.Point(0+modle_move.x,510+modle_move.y,1);
-                m_neck.position=new Flat3D.Point(0+modle_move.x,180+modle_move.y,0);
+                texture.transform.translate.x+=-5;
+                texture.transform.translate.y-=15;
             });
             //下半身
-            var m_body_bottom = new Flat3D.Thing(stage, new Flat3D.Point(0+modle_move.x, -100+modle_move.y, 0));
+            var m_body_bottom = new Flat3D.Thing(stage, new Flat3D.Point(0+modle_move.x, -250+modle_move.y, 1));
             m_body_bottom.texture.setImage(Modle_Texture.body_bottom.image, true, function (thing, texture, image) {
-                m_left_leg.position = new Flat3D.Point(-(20+Modle_Texture.leg_left_top.image.width)+modle_move.x, -(image.height)+modle_move.y, -1);
-                m_right_leg.position = new Flat3D.Point(20+modle_move.x, -(image.height)+modle_move.y, -1);
+                texture.transform.translate.x+=-5;
+                texture.transform.translate.y+=5;
             });
 
             m_body.click = function (e) {
@@ -336,6 +349,7 @@
             }
             m_left_armb.click = function (e) {
                 console.log("click arm_left_bottom");
+                wave();
             }
             m_right_armt.click = function (e) {
                 console.log("click arm_right_top");
@@ -348,8 +362,31 @@
 
             
             stage.setThing(m_head_hairb);
-            stage.setThing(m_head_hair_ex0);
+            //stage.setThing(m_head_hair_ex0);
             stage.setThing(m_neck);
+            
+            
+
+            m_left_arm.setThing(m_left_armt);
+            m_left_arm.setThing(m_left_armb);
+            stage.setThing(m_left_arm);
+            m_right_arm.setThing(m_right_armt);
+            m_right_arm.setThing(m_right_armb);
+            stage.setThing(m_right_arm);
+            
+            
+            m_left_leg.setThing(m_left_legb);
+            m_left_leg.setThing(m_left_legt);
+            stage.setThing(m_left_leg);
+
+            m_right_leg.setThing(m_right_legb);
+            m_right_leg.setThing(m_right_legt);
+            stage.setThing(m_right_leg);
+            
+            stage.setThing(m_body_bottom);
+            stage.setThing(m_body);
+
+
             m_head_f.setThing(m_head_face);
             
             m_head_f.setThing(m_head_eyet1l);
@@ -378,6 +415,7 @@
             m_head_f.setThing(m_head_faceredl);
             m_head_f.setThing(m_head_faceredr);
             m_head_f.setThing(m_head_mouth0);
+            m_head_f.setThing(m_head_hair_ex0);
             stage.setThing(m_head_f);
 
             m_head_before.setThing(m_head_hairl);
@@ -386,32 +424,50 @@
             m_head_before.setThing(m_head_hair_ex1);
             stage.setThing(m_head_before);
 
-            m_left_arm.setThing(m_left_armt);
-            m_left_arm.setThing(m_left_armb);
-            stage.setThing(m_left_arm);
-            m_right_arm.setThing(m_right_armt);
-            m_right_arm.setThing(m_right_armb);
-            stage.setThing(m_right_arm);
-            
-            
-            m_left_leg.setThing(m_left_legb);
-            m_left_leg.setThing(m_left_legt);
-            stage.setThing(m_left_leg);
-
-            m_right_leg.setThing(m_right_legb);
-            m_right_leg.setThing(m_right_legt);
-            stage.setThing(m_right_leg);
-            
-            stage.setThing(m_body_bottom);
-            stage.setThing(m_body);
-
             stage.start();
+            ele.addEventListener("mousemove",function(e){
+                stage.camera.position.x=(e.offsetX-300)*0.25;
+                stage.camera.position.y=(-e.offsetY+500)*0.25;
+                var tan=stage.camera.position.x/stage.camera.position.z;
+                var atan=Math.atan(tan)/Flat3D.Coordinate.PId180+180;
+                stage.camera.angleA=atan;
+                
 
-
-            m_left_arm.setFrameAnimationByParamKey("transform.rotate.angle",0,40,Flat3D.Ease.Quad.easeInOut,1000).start();
-            m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,90,Flat3D.Ease.Quad.easeInOut,1000).start();
-            m_left_legb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,500).start();
-            m_left_leg.setFrameAnimationByParamKey("transform.rotate.angle",0,5,Flat3D.Ease.Quad.easeInOut,500).start();
+            });
+            //m_head_before.setFrameAnimationByParamKey("position.x",0,5,Flat3D.Ease.Quad.easeInOut,1000).start();
+            function wave(){
+                m_head_f.destroyAllAnimation(true);
+                m_head_before.destroyAllAnimation(true);
+                m_head_hairb.destroyAllAnimation(true);
+                m_left_leg.destroyAllAnimation(true);
+                m_left_arm.destroyAllAnimation(true);
+                m_head_f.setFrameAnimationByParamKey("transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,1000).start();
+                m_head_before.setFrameAnimationByParamKey("transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,1000).start();
+                m_head_hairb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,1000).start();
+                m_left_arm.setFrameAnimationByParamKey("transform.rotate.angle",0,40,Flat3D.Ease.Quad.easeInOut,1000).start();
+                m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,90,Flat3D.Ease.Quad.easeInOut,1000,function(){
+                    m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",90,60,Flat3D.Ease.Quad.easeInOut,400,function(){
+                        m_left_arm.setFrameAnimationByParamKey("transform.rotate.angle",40,0,Flat3D.Ease.Quad.easeInOut,800).start();
+                        m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",90,0,Flat3D.Ease.Quad.easeInOut,800).start();
+                        m_left_legb.setFrameAnimationByParamKey("texture.transform.rotate.angle",10,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                        m_left_leg.setFrameAnimationByParamKey("transform.rotate.angle",5,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                        m_head_f.setFrameAnimationByParamKey("transform.rotate.angle",10,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                    m_head_before.setFrameAnimationByParamKey("transform.rotate.angle",10,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                    m_head_hairb.setFrameAnimationByParamKey("texture.transform.rotate.angle",10,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                    },1,true).start();
+                }).start();
+                m_left_legb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,500).start();
+                m_left_leg.setFrameAnimationByParamKey("transform.rotate.angle",0,5,Flat3D.Ease.Quad.easeInOut,500).start();
+            }
+            document.getElementById("start").addEventListener("click",function(){
+                stage.start();
+            });
+            document.getElementById("pause").addEventListener("click",function(){
+                stage.pause();
+            });
+            document.getElementById("wave").addEventListener("click",function(){
+                wave();
+            });
         }
 
     </script>

@@ -230,7 +230,22 @@ var Flat3D = {
                     }
                 }
             };
-
+            container.destroy=function(){
+                for (var a = 0; a < this.things.length; a++) {
+                    this.things[a].destroy();
+                }
+            };
+            container.destroyAllAnimation=function(containAllThing){
+                for (var a = 0; a < this.animations.length; a++) {
+                    this.animations[a].destroy();
+                }
+                this.animations=[];
+                if(containAllThing){
+                    for (var a = 0; a < this.things.length; a++) {
+                        this.things[a].destroyAllAnimation();
+                    }
+                }
+            }
             return container;
         },
         Thing: function (stage) {
@@ -351,6 +366,7 @@ var Flat3D = {
                         //cy /= trans.scale.scaleHeight;
                         //cRotate.x/= trans.scale.scaleWidth;
                         //cRotate.y /= trans.scale.scaleHeight;
+                    
                         canvas.scale(trans.scale.scaleWidth, trans.scale.scaleHeight);
                         canvas.translate(cRotate.x, cRotate.y);
                         canvas.rotate(cRotate.angle);
@@ -359,9 +375,25 @@ var Flat3D = {
                         //y /= scale.scaleHeight;
                         //rotate.x /= scale.scaleWidth;
                         //rotate.y /= scale.scaleHeight;
+                        if (Flat3D.Config.DEBUG_MODE) {
+                            // 标记原点
+                            canvas.beginPath();
+                            canvas.arc(0, 0, 8, 0, Math.PI * 2);
+                            canvas.fillStyle = "rgba(255,0,0,0.4)";
+                            canvas.fill();
+                        }
+                        
                     }
                     else {
+                        
                         var cTrans = Flat3D.Coordinate.point3DTo2D(this.position, this.stage.camera);
+                        if (Flat3D.Config.DEBUG_MODE) {
+                            // 标记原点
+                            canvas.beginPath();
+                            canvas.arc(cTrans.position2D.x, -cTrans.position2D.y, 8, 0, Math.PI * 2);
+                            canvas.fillStyle = "rgba(255,0,0,0.4)";
+                            canvas.fill();
+                        }
                         rotate.x += cTrans.position2D.x;
                         rotate.y += -cTrans.position2D.y;
                     }
@@ -395,6 +427,7 @@ var Flat3D = {
                         canvas.scale(1 / trans.scale.scaleWidth, 1 / trans.scale.scaleHeight);
                     }
                     //开始进行区域计算
+                    if(!this.texture.image)return;
                     var areaPoint = [{ x: x, y: y }, { x: x + this.texture.image.width, y: y }, { x: x + this.texture.image.width, y: y + this.texture.image.height }, { x: x, y: y + this.texture.image.height }];
                     var ttD, tan, atan, tcD;
                     for (var a = 0; a < areaPoint.length; a++) {
@@ -490,12 +523,12 @@ var Flat3D = {
                     if (this.effectSet[a] && this.effectSet[a].effectCallBack) this.effectSet[a].effectCallBack(this);
                 }
             },
-            setFrameAnimationByParamKey: function (paramKey, start, end, valueEase, dtime, completedCallBack) {
-                var ani = new Flat3D.Animation.FrameByParamKey(this, paramKey, start, end, valueEase, dtime, completedCallBack);
+            setFrameAnimationByParamKey: function (paramKey, start, end, valueEase, dtime, completedCallBack,repeat,yoyo) {
+                var ani = new Flat3D.Animation.FrameByParamKey(this, paramKey, start, end, valueEase, dtime, completedCallBack,repeat,yoyo);
                 return this.setAnimation(ani);
             },
-            setFrameAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack) {
-                var ani = new Flat3D.Animation.FrameByParamsFunc(this, paramsFunc, dtime, completedCallBack);
+            setFrameAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack,repeat,yoyo) {
+                var ani = new Flat3D.Animation.FrameByParamsFunc(this, paramsFunc, dtime, completedCallBack,repeat,yoyo);
                 return this.setAnimation(ani);
             },
             /*setForceAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack) {
@@ -524,6 +557,12 @@ var Flat3D = {
                 for (var a = 0; a < this.animations.length; a++) {
                     this.animations[a].destroy();
                 }
+            },
+            destroyAllAnimation:function(){
+                for (var a = 0; a < this.animations.length; a++) {
+                    this.animations[a].destroy();
+                }
+                this.animations=[];
             }
         };
         return thing;
@@ -612,7 +651,7 @@ var Flat3D = {
         }
     },
     Animation: {
-        FrameByParamsFunc: function (target, paramsFunc, dtime, _completedCallBack) {
+        FrameByParamsFunc: function (target, paramsFunc, dtime, _completedCallBack,repeat,yoyo) {
             var ani = {
                 status: 2,
                 finalTick: dtime,
@@ -640,17 +679,36 @@ var Flat3D = {
                 destroy: function () {
                     this.stop();
                     if (this.timer) clearInterval(this.timer);
-                }
+                },
+                isYoyo:yoyo?true:false,
+                _completeTimes:0,
+                _runDirection:1,
+                repeatTimes:repeat?repeat:1,
             };
             ani.timer = setInterval(function () {
                 if (ani.status == 1 && ani.thing.stage.status == 1) {
                     if (ani.tick >= ani.finalTick) {
+                        ani._completeTimes++;
                         if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                         ani.stop();
+                        if(ani._completeTimes<ani.repeatTimes){
+                            if(!ani.isYoyo){
+                                ani.resetTick();
+                                ani.start();
+                            }
+                            else{
+                                ani._runDirection=-1;
+                                ani.start();
+                            }
+                        }
                     }
                     else {
-                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK;
+                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK*ani._runDirection;
                         if (ani.tick > ani.finalTick) ani.tick = ani.finalTick;
+                        if (ani.tick <= 0){
+                            ani.tick=0;
+                            ani._runDirection=1;
+                        }
                         var keys = Object.keys(ani.effectParams);
                         for (var a = 0; a < keys.length; a++) {
                             var value = Flat3D.Value.getValue(ani.thing, keys[a]);
@@ -662,7 +720,7 @@ var Flat3D = {
             }, Flat3D.Config.TIMER_TICK);
             return ani;
         },
-        FrameByParamKey: function (target, paramKey, startValue, endValue, valueEase, dtime, _completedCallBack) {
+        FrameByParamKey: function (target, paramKey, startValue, endValue, valueEase, dtime, _completedCallBack,repeat,yoyo) {
             var ani = {
                 status: 2,
                 finalTick: dtime,
@@ -695,17 +753,52 @@ var Flat3D = {
                 },
                 _ease: {
                     d: 0, start: startValue, end: endValue
-                }
+                },
+                isYoyo:yoyo?true:false,
+                _completeTimes:0,
+                _runDirection:1,
+                repeatTimes:repeat?repeat:1,
             };
             ani.timer = setInterval(function () {
                 if (ani.status == 1 && ani.thing.stage.status == 1) {
                     if (ani.tick >= ani.finalTick) {
-                        if (ani.completedCallBack) ani.completedCallBack(ani.thing);
+                        ani._completeTimes++;
                         ani.stop();
+                        if(!ani.isYoyo){
+                            if (ani.completedCallBack) ani.completedCallBack(ani.thing);
+                            if(ani._completeTimes<ani.repeatTimes){
+                                ani.resetTick();
+                                ani.start();
+                            }
+                        }
+                        else{
+                            if(ani._runDirection==1){
+                                ani._runDirection=-1;
+                                ani.start();
+                                ani.tick--;
+                            }
+                            
+                        }
+                        
+
                     }
                     else {
-                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK;
+                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK*ani._runDirection;
                         if (ani.tick > ani.finalTick) ani.tick = ani.finalTick;
+                        if (ani.tick <= 0){
+                            ani.tick=0;
+                            if(ani._runDirection==-1 && ani.isYoyo){
+                                if (ani.completedCallBack) ani.completedCallBack(ani.thing);
+                            }
+                            ani._runDirection=1;
+                            if(ani._completeTimes<ani.repeatTimes){
+                                ani.resetTick();
+                                ani.start();
+                            }
+                            else{
+                                ani.stop();
+                            }
+                        }
                         var value = Flat3D.Value.getValue(ani.thing, ani.effectParamKey);
                         if (ani.ease) {
                             value = ani.ease(ani.tick, ani._ease.start, ani._ease.d, ani.finalTick);
