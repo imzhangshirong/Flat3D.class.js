@@ -9,12 +9,13 @@
 </head>
 
 <body>
-    <canvas id="StageCanvas">Your Browser don't support canvas</canvas>
     <div>
         <a href="#" id="start">start</a>
         <a href="#" id="pause">pause</a>
         <a href="#" id="wave">wave hand</a>
     </div>
+    <canvas id="StageCanvas">Your Browser don't support canvas</canvas>
+    
 </body>
 <script>
         var Modle_Texture = {
@@ -77,7 +78,7 @@
             
             stage.setFPS(60);
             stage.tickSpeed = 1;
-            stage.bindCanvas(ele, 600, 1000);
+            stage.bindCanvas(ele, 600, 950);
             console.log(stage);
             //头部
             var m_head_hairb=new Flat3D.Thing(stage,new Flat3D.Point(0+modle_move.x,14+modle_move.y,-5));
