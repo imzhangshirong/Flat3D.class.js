@@ -39,7 +39,7 @@ var Flat3D = {
                 this.canvasBuffer.translate(-this.rect.left, -this.rect.top);
                 this.updateStage();
             },
-            setThing: function (thing) {
+            addThing: function (thing) {
                 var newThings = [];
                 for (var a = 0; a < this.things.length; a++) {
                     if (this.things[a]) {
@@ -93,6 +93,11 @@ var Flat3D = {
             },
             setFPS: function (FPS) {
                 this.updateDuration = 1000 / FPS;
+            },
+            destroyAllAnimation: function () {
+                for (var a = 0; a < this.things.length; a++) {
+                    this.things[a].destroyAllAnimation(true);
+                }
             }
         };
         stage.timer = setInterval(function () {
@@ -155,18 +160,18 @@ var Flat3D = {
             };
         }
     },
-    Resource:{
-        loadTextureSet:function(textureSet,process){
-            if(textureSet){
-                var keys=Object.keys(textureSet);
-                var loaded=0;
-                for(var a=0;a<keys.length;a++){
-                    textureSet[keys[a]].image=new Image();
-                    textureSet[keys[a]].image.src=textureSet[keys[a]].src;
-                    textureSet[keys[a]].image.onload=function(){
+    Resource: {
+        loadTextureSet: function (textureSet, process) {
+            if (textureSet) {
+                var keys = Object.keys(textureSet);
+                var loaded = 0;
+                for (var a = 0; a < keys.length; a++) {
+                    textureSet[keys[a]].image = new Image();
+                    textureSet[keys[a]].image.src = textureSet[keys[a]].src;
+                    textureSet[keys[a]].image.onload = function () {
                         loaded++;
-                        if(process){
-                            process(loaded,keys.length);
+                        if (process) {
+                            process(loaded, keys.length);
                         }
                     }
                 }
@@ -178,7 +183,7 @@ var Flat3D = {
             var container = new Flat3D.Thing(stage, position);
             container.texture = undefined;
             container.things = [];
-            container.setThing = function (thing) {
+            container.addThing = function (thing) {
                 thing.container = this;
                 var newThings = [];
                 for (var a = 0; a < this.things.length; a++) {
@@ -216,6 +221,7 @@ var Flat3D = {
                 }
             };
             container.draw = function () {
+                if(!this.visible)return;
                 this._2dCoordinate = Flat3D.Coordinate.point3DTo2D(this.position, this.stage.camera);
                 for (var a = 0; a < this.things.length; a++) {
                     if (this.things[a]) {
@@ -230,21 +236,21 @@ var Flat3D = {
                     }
                 }
             };
-            container.destroy=function(){
+            container.destroy = function () {
                 for (var a = 0; a < this.things.length; a++) {
                     this.things[a].destroy();
                 }
             };
-            container.destroyAllAnimation=function(containAllThing){
-                for (var a = 0; a < this.animations.length; a++) {
-                    this.animations[a].destroy();
-                }
-                this.animations=[];
-                if(containAllThing){
+            container.destroyAllAnimation = function (containAllThing) {
+                if (containAllThing) {
                     for (var a = 0; a < this.things.length; a++) {
                         this.things[a].destroyAllAnimation();
                     }
                 }
+                for (var a = 0; a < this.animations.length; a++) {
+                    this.animations[a].destroy();
+                }
+                this.animations = [];
             }
             return container;
         },
@@ -264,9 +270,9 @@ var Flat3D = {
                 y: 0
             },
             transform: new Flat3D.Transform(),
-            setImage:function(image, moveToCenter, loadComplete){
-                this.image=image;
-                if(image.width && image.width>0){
+            setImage: function (image, moveToCenter, loadComplete) {
+                this.image = image;
+                if (image.width && image.width > 0) {
                     this.imageCanDraw = true;
                     if (moveToCenter) {
                         this.transform.translate = {
@@ -274,7 +280,7 @@ var Flat3D = {
                             y: -image.height / 2,
                         }
                     }
-                    if (loadComplete) loadComplete(this.thing,this,this.image);
+                    if (loadComplete) loadComplete(this.thing, this, this.image);
                 }
             },
             setImageURL: function (url, moveToCenter, loadComplete) {
@@ -324,15 +330,15 @@ var Flat3D = {
         var thing = {
             stage: stage,
             position: position,
-            effectCallBack: function (fromThing) { },
-            effectSet: [],
             rect: undefined,
+            visible:true,
+            opacity:1,
             animations: [],
             click: function (e) { },
             texture: new Flat3D.Texture(thing),
             draw: function (getArea) {
                 var trans = new Flat3D.Transform();
-                if (this.texture && this.texture.image && this.texture.imageCanDraw && this.stage.canvas) {
+                if (this.visible && this.texture && this.texture.image && this.texture.imageCanDraw && this.stage.canvas) {
                     var canvas = this.stage.canvas;
                     if (getArea) {
                         canvas = this.stage.canvasBuffer;
@@ -366,7 +372,7 @@ var Flat3D = {
                         //cy /= trans.scale.scaleHeight;
                         //cRotate.x/= trans.scale.scaleWidth;
                         //cRotate.y /= trans.scale.scaleHeight;
-                    
+                        canvas.globalAlpha=this.container.opacity;
                         canvas.scale(trans.scale.scaleWidth, trans.scale.scaleHeight);
                         canvas.translate(cRotate.x, cRotate.y);
                         canvas.rotate(cRotate.angle);
@@ -382,10 +388,10 @@ var Flat3D = {
                             canvas.fillStyle = "rgba(255,0,0,0.4)";
                             canvas.fill();
                         }
-                        
+
                     }
                     else {
-                        
+
                         var cTrans = Flat3D.Coordinate.point3DTo2D(this.position, this.stage.camera);
                         if (Flat3D.Config.DEBUG_MODE) {
                             // 标记原点
@@ -397,11 +403,12 @@ var Flat3D = {
                         rotate.x += cTrans.position2D.x;
                         rotate.y += -cTrans.position2D.y;
                     }
-                    
                     canvas.scale(scale.scaleWidth, scale.scaleHeight);
                     canvas.translate(rotate.x, rotate.y);
                     canvas.rotate(rotate.angle);
+                    canvas.globalAlpha*=this.opacity;                    
                     canvas.drawImage(this.texture.image, x, y);
+                    canvas.globalAlpha=1;    
                     if (Flat3D.Config.DEBUG_MODE) {
                         // 标记thing旋转中心
                         canvas.beginPath();
@@ -427,7 +434,7 @@ var Flat3D = {
                         canvas.scale(1 / trans.scale.scaleWidth, 1 / trans.scale.scaleHeight);
                     }
                     //开始进行区域计算
-                    if(!this.texture.image)return;
+                    if (!this.texture.image) return;
                     var areaPoint = [{ x: x, y: y }, { x: x + this.texture.image.width, y: y }, { x: x + this.texture.image.width, y: y + this.texture.image.height }, { x: x, y: y + this.texture.image.height }];
                     var ttD, tan, atan, tcD;
                     for (var a = 0; a < areaPoint.length; a++) {
@@ -484,6 +491,7 @@ var Flat3D = {
             },
             updateMatrix: function () {
                 //更新区域矩阵
+                //return 0;
                 if (!this.stage.canvasBuffer) return;
                 this.stage.canvasBuffer.clearRect(this.stage.rect.left, this.stage.rect.top, this.stage.rect.width, this.stage.rect.height);
                 this.draw(true);
@@ -494,10 +502,12 @@ var Flat3D = {
                 this.stage.canvas.strokeRect(area.left, area.top, area.width, area.height);
                 */
                 //this.stage.canvas.fillStyle="rgba(255,255,0,0.4)";
-                for (var a = area.left; a <= area.right; a++) {
-                    for (var b = area.top; b <= area.bottom; b++) {
-                        x = a + left;
-                        y = b + top;
+                var x = area.left + left, y = 0;
+                for (var a = area.left; a <= area.right; a++ && x++) {
+                    y = area.top + top;
+                    for (var b = area.top; b <= area.bottom; b++ && y++) {
+                        //x = a + left;
+                        //y = b + top;
                         if (x > -1 && y > -1 && x < this.stage.rect.width && y < this.stage.rect.height && this.stage.rect.in(a, b)) {
                             var color = Flat3D.Value.getStageColor(colorData, x, y);
                             if (color.alpha > 0) {
@@ -517,25 +527,19 @@ var Flat3D = {
             setTexture: function (texture) {
                 this.texture = texture;
             },
-            notifyEffectSet: function () {
-                var n = this.effectSet.length;
-                for (var a = 0; a < n; a++) {
-                    if (this.effectSet[a] && this.effectSet[a].effectCallBack) this.effectSet[a].effectCallBack(this);
-                }
+            addFrameAnimationByParamKey: function (paramKey, start, end, valueEase, dtime, completedCallBack, repeat, yoyo, recover) {
+                var ani = new Flat3D.Animation.FrameByParamKey(this, paramKey, start, end, valueEase, dtime, completedCallBack, repeat, yoyo, recover);
+                return this.addAnimation(ani);
             },
-            setFrameAnimationByParamKey: function (paramKey, start, end, valueEase, dtime, completedCallBack,repeat,yoyo) {
-                var ani = new Flat3D.Animation.FrameByParamKey(this, paramKey, start, end, valueEase, dtime, completedCallBack,repeat,yoyo);
-                return this.setAnimation(ani);
+            addFrameAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack, repeat, yoyo) {
+                var ani = new Flat3D.Animation.FrameByParamsFunc(this, paramsFunc, dtime, completedCallBack, repeat, yoyo);
+                return this.addAnimation(ani);
             },
-            setFrameAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack,repeat,yoyo) {
-                var ani = new Flat3D.Animation.FrameByParamsFunc(this, paramsFunc, dtime, completedCallBack,repeat,yoyo);
-                return this.setAnimation(ani);
-            },
-            /*setForceAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack) {
+            /*addForceAnimationByParamsFunc: function (paramsFunc, dtime, completedCallBack) {
                 var ani = new Flat3D.Animation.ForceParamsFunc(this, paramsFunc, dtime, completedCallBack);
-                return this.setAnimation(ani);
+                return this.addAnimation(ani);
             },*/
-            setAnimation: function (ani) {
+            addAnimation: function (ani) {
                 var newAnis = [];
                 for (var a = 0; a < this.animations.length; a++) {
                     if (this.animations[a]) {
@@ -558,11 +562,11 @@ var Flat3D = {
                     this.animations[a].destroy();
                 }
             },
-            destroyAllAnimation:function(){
+            destroyAllAnimation: function () {
                 for (var a = 0; a < this.animations.length; a++) {
                     this.animations[a].destroy();
                 }
-                this.animations=[];
+                this.animations = [];
             }
         };
         return thing;
@@ -651,7 +655,7 @@ var Flat3D = {
         }
     },
     Animation: {
-        FrameByParamsFunc: function (target, paramsFunc, dtime, _completedCallBack,repeat,yoyo) {
+        FrameByParamsFunc: function (target, paramsFunc, dtime, _completedCallBack, repeat, yoyo) {
             var ani = {
                 status: 2,
                 finalTick: dtime,
@@ -680,10 +684,10 @@ var Flat3D = {
                     this.stop();
                     if (this.timer) clearInterval(this.timer);
                 },
-                isYoyo:yoyo?true:false,
-                _completeTimes:0,
-                _runDirection:1,
-                repeatTimes:repeat?repeat:1,
+                isYoyo: yoyo ? true : false,
+                _completeTimes: 0,
+                _runDirection: 1,
+                repeatTimes: repeat ? repeat : 1,
             };
             ani.timer = setInterval(function () {
                 if (ani.status == 1 && ani.thing.stage.status == 1) {
@@ -691,23 +695,23 @@ var Flat3D = {
                         ani._completeTimes++;
                         if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                         ani.stop();
-                        if(ani._completeTimes<ani.repeatTimes){
-                            if(!ani.isYoyo){
+                        if (ani._completeTimes < ani.repeatTimes) {
+                            if (!ani.isYoyo) {
                                 ani.resetTick();
                                 ani.start();
                             }
-                            else{
-                                ani._runDirection=-1;
+                            else {
+                                ani._runDirection = -1;
                                 ani.start();
                             }
                         }
                     }
                     else {
-                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK*ani._runDirection;
+                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK * ani._runDirection;
                         if (ani.tick > ani.finalTick) ani.tick = ani.finalTick;
-                        if (ani.tick <= 0){
-                            ani.tick=0;
-                            ani._runDirection=1;
+                        if (ani.tick <= 0) {
+                            ani.tick = 0;
+                            ani._runDirection = 1;
                         }
                         var keys = Object.keys(ani.effectParams);
                         for (var a = 0; a < keys.length; a++) {
@@ -720,7 +724,7 @@ var Flat3D = {
             }, Flat3D.Config.TIMER_TICK);
             return ani;
         },
-        FrameByParamKey: function (target, paramKey, startValue, endValue, valueEase, dtime, _completedCallBack,repeat,yoyo) {
+        FrameByParamKey: function (target, paramKey, startValue, endValue, valueEase, dtime, _completedCallBack, repeat, yoyo, recover) {
             var ani = {
                 status: 2,
                 finalTick: dtime,
@@ -731,6 +735,7 @@ var Flat3D = {
                 effectParamKey: paramKey,
                 ease: valueEase,
                 start: function () {
+                    if(this.tick==0)Flat3D.Value.setValue(this.thing, this.effectParamKey, this._ease.start);
                     this._ease.d = this._ease.end - this._ease.start;
                     this.status = 1;
                 },
@@ -750,52 +755,57 @@ var Flat3D = {
                 destroy: function () {
                     this.stop();
                     if (this.timer) clearInterval(this.timer);
+                    if (this.canRecover) Flat3D.Value.setValue(this.thing, this.effectParamKey, this._recoverValue);
                 },
                 _ease: {
-                    d: 0, start: startValue, end: endValue
+                    d: 0,
+                    start: (startValue != null) ? startValue : Flat3D.Value.getValue(target, paramKey),
+                    end: (endValue != null) ? endValue : Flat3D.Value.getValue(target, paramKey)
                 },
-                isYoyo:yoyo?true:false,
-                _completeTimes:0,
-                _runDirection:1,
-                repeatTimes:repeat?repeat:1,
+                isYoyo: yoyo ? true : false,
+                _completeTimes: 0,
+                _runDirection: 1,
+                _recoverValue: (startValue != null) ? startValue : Flat3D.Value.getValue(target, paramKey),
+                canRecover: recover,
+                repeatTimes: repeat ? repeat : 1,
             };
             ani.timer = setInterval(function () {
                 if (ani.status == 1 && ani.thing.stage.status == 1) {
                     if (ani.tick >= ani.finalTick) {
                         ani._completeTimes++;
                         ani.stop();
-                        if(!ani.isYoyo){
+                        if (!ani.isYoyo) {
                             if (ani.completedCallBack) ani.completedCallBack(ani.thing);
-                            if(ani._completeTimes<ani.repeatTimes){
+                            if (ani._completeTimes < ani.repeatTimes) {
                                 ani.resetTick();
                                 ani.start();
                             }
                         }
-                        else{
-                            if(ani._runDirection==1){
-                                ani._runDirection=-1;
+                        else {
+                            if (ani._runDirection == 1) {
+                                ani._runDirection = -1;
                                 ani.start();
                                 ani.tick--;
                             }
-                            
+
                         }
-                        
+
 
                     }
                     else {
-                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK*ani._runDirection;
+                        ani.tick += ani.thing.stage.tickSpeed * Flat3D.Config.TIMER_TICK * ani._runDirection;
                         if (ani.tick > ani.finalTick) ani.tick = ani.finalTick;
-                        if (ani.tick <= 0){
-                            ani.tick=0;
-                            if(ani._runDirection==-1 && ani.isYoyo){
+                        if (ani.tick <= 0) {
+                            ani.tick = 0;
+                            if (ani._runDirection == -1 && ani.isYoyo) {
                                 if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                             }
-                            ani._runDirection=1;
-                            if(ani._completeTimes<ani.repeatTimes){
+                            ani._runDirection = 1;
+                            if (ani._completeTimes < ani.repeatTimes) {
                                 ani.resetTick();
                                 ani.start();
                             }
-                            else{
+                            else {
                                 ani.stop();
                             }
                         }
@@ -813,6 +823,60 @@ var Flat3D = {
             }, Flat3D.Config.TIMER_TICK);
             return ani;
         }
+    },
+    InfluenceSet: function (parentThing, effectSourceKey) {
+        var keys = effectSourceKey.split(".");
+        var key = effectSourceKey;
+        var value = parentThing;
+        if (keys.length > 0) {
+            for (var a = 0; a < keys.length - 1; a++) {
+                value = value[keys[a]];
+            }
+            key = keys[keys.length - 1];
+        }
+        var influenceSet = {
+            listeners: [],
+            thing: parentThing,
+            lastDate: {
+                before: value[key], after: value[key]
+            },
+            removeListener: function (listener) {
+                var id = this.listeners.indexOf(listener);
+                if (id > -1) {
+                    this.listeners[id] = undefined;
+                }
+            },
+            notify: function (before, after) {
+                this.lastDate = { before: before, after: after };
+                for (var a = 0; a < this.listeners.length; a++) {
+                    if (this.listeners[a]) {
+                        this.listeners[a](parentThing, before, after);
+                    }
+                }
+            }
+        };
+        influenceSet.addListener = function (listener) {
+            var newListeners = [];
+            for (var a = 0; a < this.listeners.length; a++) {
+                if (this.listeners[a]) {
+                    newListeners.push(this.listeners[a]);
+                }
+            }
+            this.listeners = newListeners;
+            this.listeners.push(listener);
+            listener(parentThing, this.lastDate.before, this.lastDate.after);
+            return listener;
+        };
+        var newSpace=value[key];
+        Object.defineProperty(value, key, {
+            set: function (data) {
+                var before = newSpace;
+                newSpace = data;
+                influenceSet.notify(before,data);
+            },
+            get: function () {return newSpace;}
+        });
+        return influenceSet;
     },
     Path: {},
     Vector: function (_x, _y, _z) {

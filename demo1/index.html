@@ -12,7 +12,10 @@
     <div>
         <a href="#" id="start">start</a>
         <a href="#" id="pause">pause</a>
-        <a href="#" id="wave">wave hand</a>
+        <a href="#" id="wave">wave hand 1</a>
+        <a href="#" id="wave2">wave hand 2</a>
+        <a href="#" id="jump">jump</a>
+        <a href="#" id="blingeye">blingeye</a>
     </div>
     <canvas id="StageCanvas">Your Browser don't support canvas</canvas>
     
@@ -70,7 +73,7 @@
         });
         var stage = new Flat3D.Stage();
         function init() {
-            Flat3D.Config.DEBUG_MODE = true;
+            //Flat3D.Config.DEBUG_MODE = true;
             var modle_move={x:0,y:0};
             var SCALE = 0.6;
             var ele = document.getElementById("StageCanvas");
@@ -92,7 +95,7 @@
             });*/
             var m_head_f=new Flat3D.Contain.Container(stage,new Flat3D.Point(0+modle_move.x,14+modle_move.y,3));
             m_head_f.transform.translate.y=-340;
-            var m_head_before=new Flat3D.Contain.Container(stage,new Flat3D.Point(0+modle_move.x,14+modle_move.y,4));
+            var m_head_before=new Flat3D.Contain.Container(stage,new Flat3D.Point(0+modle_move.x,14+modle_move.y,5));
             m_head_before.transform.translate.y=-340;
             var m_head_hairt=new Flat3D.Contain.Thing(stage);
             
@@ -203,11 +206,11 @@
             });
             m_head_eyet4l.texture.setImage(Modle_Texture.head_eyet4_left.image,true,function(thing,texture,image){
                 texture.position.y=275;
-                texture.position.x=70;
+                texture.position.x=-70;
             });
             m_head_eyet4r.texture.setImage(Modle_Texture.head_eyet4_right.image,true,function(thing,texture,image){
                 texture.position.y=275;
-                texture.position.x=-70;
+                texture.position.x=70;
             });
             m_head_eyet5l.texture.setImage(Modle_Texture.head_eyet5_left.image,true,function(thing,texture,image){
                 texture.position.y=275;
@@ -219,11 +222,11 @@
             });
             m_head_eyet6l.texture.setImage(Modle_Texture.head_eyet6_left.image,true,function(thing,texture,image){
                 texture.position.y=316;
-                texture.position.x=-70;
+                texture.position.x=-75;
             });
             m_head_eyet6r.texture.setImage(Modle_Texture.head_eyet6_right.image,true,function(thing,texture,image){
                 texture.position.y=316;
-                texture.position.x=70;
+                texture.position.x=75;
             });
             m_head_eyet7l.texture.setImage(Modle_Texture.head_eyet7_left.image,true,function(thing,texture,image){
                 texture.position.y=322;
@@ -357,73 +360,89 @@
             }
             m_right_armb.click = function (e) {
                 console.log("click arm_right_bottom");
+                wave2();
+            }
+            m_right_legb.click = function (e) {
+                console.log("click leg_right_bottom");
+                jump();
+            }
+            m_left_legb.click = function (e) {
+                console.log("click leg_left_bottom");
+                jump();
             }
 
 
+            
+            stage.addThing(m_head_hairb);
+            //stage.addThing(m_head_hair_ex0);
+            stage.addThing(m_neck);
+            
+            
+
+            m_left_arm.addThing(m_left_armt);
+            m_left_arm.addThing(m_left_armb);
+            stage.addThing(m_left_arm);
+            m_right_arm.addThing(m_right_armt);
+            m_right_arm.addThing(m_right_armb);
+            stage.addThing(m_right_arm);
+            
+            
+            m_left_leg.addThing(m_left_legb);
+            m_left_leg.addThing(m_left_legt);
+            stage.addThing(m_left_leg);
+
+            m_right_leg.addThing(m_right_legb);
+            m_right_leg.addThing(m_right_legt);
+            stage.addThing(m_right_leg);
+            
+            stage.addThing(m_body_bottom);
+            stage.addThing(m_body);
+
+
+            m_head_f.addThing(m_head_face);
+            
+            m_head_f.addThing(m_head_eyet8l);
+            m_head_f.addThing(m_head_eyet8r);
+            m_head_f.addThing(m_head_eyet5l);
+            m_head_f.addThing(m_head_eyet5r);
+            m_head_f.addThing(m_head_eyet4l);
+            m_head_f.addThing(m_head_eyet4r);
+            m_head_f.addThing(m_head_eyet9l);
+            m_head_f.addThing(m_head_eyet9r);
+
+
+            m_head_f.addThing(m_head_eyet7l);
+            m_head_f.addThing(m_head_eyet7r);
+            
+            m_head_f.addThing(m_head_eyet6l);
+            m_head_f.addThing(m_head_eyet6r);
 
             
-            stage.setThing(m_head_hairb);
-            //stage.setThing(m_head_hair_ex0);
-            stage.setThing(m_neck);
             
             
+            m_head_f.addThing(m_head_eyet1l);
+            m_head_f.addThing(m_head_eyet1r);
+            m_head_f.addThing(m_head_eyet0l);
+            m_head_f.addThing(m_head_eyet0r);
+            m_head_f.addThing(m_head_eyebrowl);
+            m_head_f.addThing(m_head_eyebrowr);
+            m_head_f.addThing(m_head_eyet3l);
+            m_head_f.addThing(m_head_eyet3r);
+            m_head_f.addThing(m_head_eyet2l);
+            m_head_f.addThing(m_head_eyet2r);
 
-            m_left_arm.setThing(m_left_armt);
-            m_left_arm.setThing(m_left_armb);
-            stage.setThing(m_left_arm);
-            m_right_arm.setThing(m_right_armt);
-            m_right_arm.setThing(m_right_armb);
-            stage.setThing(m_right_arm);
-            
-            
-            m_left_leg.setThing(m_left_legb);
-            m_left_leg.setThing(m_left_legt);
-            stage.setThing(m_left_leg);
+            m_head_f.addThing(m_head_faceredl);
+            m_head_f.addThing(m_head_faceredr);
+            m_head_f.addThing(m_head_mouth0);
+            m_head_f.addThing(m_head_hair_ex0);
 
-            m_right_leg.setThing(m_right_legb);
-            m_right_leg.setThing(m_right_legt);
-            stage.setThing(m_right_leg);
-            
-            stage.setThing(m_body_bottom);
-            stage.setThing(m_body);
+            stage.addThing(m_head_f);
 
-
-            m_head_f.setThing(m_head_face);
-            
-            m_head_f.setThing(m_head_eyet1l);
-            m_head_f.setThing(m_head_eyet1r);
-            m_head_f.setThing(m_head_eyebrowl);
-            m_head_f.setThing(m_head_eyebrowr);
-            m_head_f.setThing(m_head_eyet0l);
-            m_head_f.setThing(m_head_eyet0r);
-           
-            m_head_f.setThing(m_head_eyet8l);
-            m_head_f.setThing(m_head_eyet8r);
-            m_head_f.setThing(m_head_eyet5l);
-            m_head_f.setThing(m_head_eyet5r);
-            m_head_f.setThing(m_head_eyet4l);
-            m_head_f.setThing(m_head_eyet4r);
-            m_head_f.setThing(m_head_eyet9l);
-            m_head_f.setThing(m_head_eyet9r);
-            m_head_f.setThing(m_head_eyet7l);
-            m_head_f.setThing(m_head_eyet7r);
-            m_head_f.setThing(m_head_eyet3l);
-            m_head_f.setThing(m_head_eyet3r);
-            m_head_f.setThing(m_head_eyet6l);
-            m_head_f.setThing(m_head_eyet6r);
-            m_head_f.setThing(m_head_eyet2l);
-            m_head_f.setThing(m_head_eyet2r);
-            m_head_f.setThing(m_head_faceredl);
-            m_head_f.setThing(m_head_faceredr);
-            m_head_f.setThing(m_head_mouth0);
-            m_head_f.setThing(m_head_hair_ex0);
-            stage.setThing(m_head_f);
-
-            m_head_before.setThing(m_head_hairl);
-            m_head_before.setThing(m_head_hairr);
-            m_head_before.setThing(m_head_hairt);
-            m_head_before.setThing(m_head_hair_ex1);
-            stage.setThing(m_head_before);
+            m_head_before.addThing(m_head_hairl);
+            m_head_before.addThing(m_head_hairr);
+            m_head_before.addThing(m_head_hairt);
+            m_head_before.addThing(m_head_hair_ex1);
+            stage.addThing(m_head_before);
 
             stage.start();
             ele.addEventListener("mousemove",function(e){
@@ -435,30 +454,97 @@
                 
 
             });
-            //m_head_before.setFrameAnimationByParamKey("position.x",0,5,Flat3D.Ease.Quad.easeInOut,1000).start();
+            //m_head_before.addFrameAnimationByParamKey("position.x",0,5,Flat3D.Ease.Quad.easeInOut,1000).start();
+            
             function wave(){
-                m_head_f.destroyAllAnimation(true);
-                m_head_before.destroyAllAnimation(true);
-                m_head_hairb.destroyAllAnimation(true);
-                m_left_leg.destroyAllAnimation(true);
-                m_left_arm.destroyAllAnimation(true);
-                m_head_f.setFrameAnimationByParamKey("transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,1000).start();
-                m_head_before.setFrameAnimationByParamKey("transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,1000).start();
-                m_head_hairb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,1000).start();
-                m_left_arm.setFrameAnimationByParamKey("transform.rotate.angle",0,40,Flat3D.Ease.Quad.easeInOut,1000).start();
-                m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,90,Flat3D.Ease.Quad.easeInOut,1000,function(){
-                    m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",90,60,Flat3D.Ease.Quad.easeInOut,400,function(){
-                        m_left_arm.setFrameAnimationByParamKey("transform.rotate.angle",40,0,Flat3D.Ease.Quad.easeInOut,800).start();
-                        m_left_armb.setFrameAnimationByParamKey("texture.transform.rotate.angle",90,0,Flat3D.Ease.Quad.easeInOut,800).start();
-                        m_left_legb.setFrameAnimationByParamKey("texture.transform.rotate.angle",10,0,Flat3D.Ease.Quad.easeInOut,500).start();
-                        m_left_leg.setFrameAnimationByParamKey("transform.rotate.angle",5,0,Flat3D.Ease.Quad.easeInOut,500).start();
-                        m_head_f.setFrameAnimationByParamKey("transform.rotate.angle",10,0,Flat3D.Ease.Quad.easeInOut,500).start();
-                    m_head_before.setFrameAnimationByParamKey("transform.rotate.angle",10,0,Flat3D.Ease.Quad.easeInOut,500).start();
-                    m_head_hairb.setFrameAnimationByParamKey("texture.transform.rotate.angle",10,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                stage.destroyAllAnimation();
+                m_head_f.addFrameAnimationByParamKey("transform.rotate.angle",0,8,Flat3D.Ease.Quad.easeInOut,1000,null,1,false,true).start();
+                m_head_before.addFrameAnimationByParamKey("transform.rotate.angle",0,8,Flat3D.Ease.Quad.easeInOut,1000,null,1,false,true).start();
+                m_head_hairb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,8,Flat3D.Ease.Quad.easeInOut,1000,null,1,false,true).start();
+                m_left_arm.addFrameAnimationByParamKey("transform.rotate.angle",0,40,Flat3D.Ease.Quad.easeInOut,1000,null,1,false,true).start();
+                m_left_armb.addFrameAnimationByParamKey("texture.transform.rotate.angle",0,90,Flat3D.Ease.Quad.easeInOut,1000,function(){
+                    m_left_armb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,60,Flat3D.Ease.Quad.easeInOut,400,function(){
+                        m_left_arm.addFrameAnimationByParamKey("transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,800).start();
+                        m_left_armb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,800).start();
+                        m_left_legb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                        m_left_leg.addFrameAnimationByParamKey("transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                        m_head_f.addFrameAnimationByParamKey("transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                    m_head_before.addFrameAnimationByParamKey("transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,500).start();
+                    m_head_hairb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,500).start();
                     },1,true).start();
-                }).start();
-                m_left_legb.setFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,500).start();
-                m_left_leg.setFrameAnimationByParamKey("transform.rotate.angle",0,5,Flat3D.Ease.Quad.easeInOut,500).start();
+                },1,false,true).start();
+                m_left_legb.addFrameAnimationByParamKey("texture.transform.rotate.angle",0,10,Flat3D.Ease.Quad.easeInOut,500,null,1,false,true).start();
+                m_left_leg.addFrameAnimationByParamKey("transform.rotate.angle",0,5,Flat3D.Ease.Quad.easeInOut,500,null,1,false,true).start();
+            }
+            function wave2(){
+                stage.destroyAllAnimation();
+                m_left_arm.addFrameAnimationByParamKey("transform.rotate.angle",0,16,Flat3D.Ease.Quad.easeInOut,600,null,2,true,true).start();
+                m_right_arm.addFrameAnimationByParamKey("transform.rotate.angle",0,-16,Flat3D.Ease.Quad.easeInOut,600,null,2,true,true).start();
+                
+            }
+            function jump(){
+                stage.destroyAllAnimation();
+                m_left_leg.addFrameAnimationByParamKey("transform.rotate.angle",null,-10,Flat3D.Ease.Quad.easeInOut,600,null,1,false,true).start();
+                m_left_legb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,18,Flat3D.Ease.Quad.easeInOut,600,null,1,false,true).start();
+                m_right_leg.addFrameAnimationByParamKey("transform.rotate.angle",null,10,Flat3D.Ease.Quad.easeInOut,600,null,1,false,true).start();
+                m_right_legb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,-18,Flat3D.Ease.Quad.easeInOut,600,null,1,false,true).start();
+                setTimeout(function(){
+                    m_left_leg.addFrameAnimationByParamKey("transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,200).start();
+                    m_left_legb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,200).start();
+                    m_right_leg.addFrameAnimationByParamKey("transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,200).start();
+                    m_right_legb.addFrameAnimationByParamKey("texture.transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,200).start();
+                    
+                },600);
+                m_left_arm.addFrameAnimationByParamKey("transform.rotate.angle",null,-8,Flat3D.Ease.Quad.easeIn,800,function(){
+                    m_left_arm.addFrameAnimationByParamKey("transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,800).start();
+                },1,false,true).start();
+                m_right_arm.addFrameAnimationByParamKey("transform.rotate.angle",null,8,Flat3D.Ease.Quad.easeIn,800,function(){
+                    m_right_arm.addFrameAnimationByParamKey("transform.rotate.angle",null,0,Flat3D.Ease.Quad.easeInOut,800).start();
+                },1,false,true).start();
+                var py=m_body.position.y;
+                m_body.addFrameAnimationByParamKey("position.y",null,py-20,Flat3D.Ease.Linear,600,function(){
+                    m_body.addFrameAnimationByParamKey("position.y",null,py+90,Flat3D.Ease.Quad.easeOut,400,function(){
+                        m_body.addFrameAnimationByParamKey("position.y",null,py,Flat3D.Ease.Quad.easeIn,400,function(){
+                            
+                        }).start();
+                    }).start();
+                },1,false,true).start();
+                
+            }
+            function blingeye(delay){
+                stage.destroyAllAnimation();
+                var templ=m_head_eyet3l.texture.transform.translate.y;
+                m_head_eyet3l.addFrameAnimationByParamKey("texture.transform.translate.y",null,15,Flat3D.Ease.Linear,150,function(){
+                    setTimeout(function(){
+                        m_head_eyet3l.addFrameAnimationByParamKey("texture.transform.translate.y",null,templ,Flat3D.Ease.Linear,200).start();
+                        m_head_eyet4l.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,100,null,1,false).start();
+                        m_head_eyet5l.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,100,null,1,false).start();
+                        m_head_eyet6l.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,100,null,1,false).start();
+                        m_head_eyet7l.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,100,null,1,false).start();
+                        m_head_eyet8l.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,50,null,1,false).start();
+                    },delay);
+                },1,false,true).start();
+                m_head_eyet4l.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,100,null,1,false,true).start();
+                m_head_eyet5l.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,100,null,1,false,true).start();
+                m_head_eyet6l.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,100,null,1,false,true).start();
+                m_head_eyet7l.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,100,null,1,false,true).start();
+                m_head_eyet8l.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,50,null,1,false,true).start();
+                var tempr=m_head_eyet3r.texture.transform.translate.y;
+                m_head_eyet3r.addFrameAnimationByParamKey("texture.transform.translate.y",null,15,Flat3D.Ease.Linear,150,function(){
+                    setTimeout(function(){
+                        m_head_eyet3r.addFrameAnimationByParamKey("texture.transform.translate.y",null,templ,Flat3D.Ease.Linear,200).start();
+                        m_head_eyet4r.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,100,null,1,false).start();
+                        m_head_eyet5r.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,100,null,1,false).start();
+                        m_head_eyet6r.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,100,null,1,false).start();
+                        m_head_eyet7r.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,100,null,1,false).start();
+                        m_head_eyet8r.addFrameAnimationByParamKey("opacity",0.8,1,Flat3D.Ease.Expo.easeOut,50,null,1,false).start();
+                    },delay);
+                },1,false,true).start();
+                m_head_eyet4r.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,100,null,1,false,true).start();
+                m_head_eyet5r.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,100,null,1,false,true).start();
+                m_head_eyet6r.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,100,null,1,false,true).start();
+                m_head_eyet7r.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,100,null,1,false,true).start();
+                m_head_eyet8r.addFrameAnimationByParamKey("opacity",null,0,Flat3D.Ease.Expo.easeIn,50,null,1,false,true).start();
             }
             document.getElementById("start").addEventListener("click",function(){
                 stage.start();
@@ -468,6 +554,50 @@
             });
             document.getElementById("wave").addEventListener("click",function(){
                 wave();
+            });
+            document.getElementById("wave2").addEventListener("click",function(){
+                wave2();
+            });
+            document.getElementById("jump").addEventListener("click",function(){
+                jump();
+            });
+            document.getElementById("blingeye").addEventListener("click",function(){
+                blingeye(100);
+            });
+            var bodyControl=new Flat3D.InfluenceSet(m_body,"position.y");
+            bodyControl.addListener(function(thing,before,after){
+                var d=after-before;
+                m_body_bottom.position.y+=d;
+                m_head_before.position.y+=d;
+                m_head_hairb.position.y+=d;
+                m_head_f.position.y+=d;
+                m_neck.position.y+=d;
+                m_left_arm.position.y+=d;
+                m_right_arm.position.y+=d;
+                m_left_leg.position.y+=d;
+                m_right_leg.position.y+=d;
+            });
+
+            var eyeControlLeft=new Flat3D.InfluenceSet(m_head_eyet3l,"texture.transform.translate.y");
+            eyeControlLeft.addListener(function(thing,before,after){
+                var d=after-before;
+                m_head_eyet1l.texture.transform.translate.y+=d;
+                m_head_eyet2l.texture.transform.translate.y+=d;
+                m_head_eyet0l.texture.transform.translate.y+=d/4;
+                m_head_eyet5l.texture.transform.translate.y+=d/3;
+                m_head_eyet7l.texture.transform.translate.y-=d/3;
+                m_head_eyet6l.texture.transform.translate.y-=d/3;
+            });
+
+            var eyeControlRight=new Flat3D.InfluenceSet(m_head_eyet3r,"texture.transform.translate.y");
+            eyeControlRight.addListener(function(thing,before,after){
+                var d=after-before;
+                m_head_eyet1r.texture.transform.translate.y+=d;
+                m_head_eyet2r.texture.transform.translate.y+=d;
+                m_head_eyet0r.texture.transform.translate.y+=d/4;
+                m_head_eyet5r.texture.transform.translate.y+=d/3;
+                m_head_eyet7r.texture.transform.translate.y-=d/2;
+                m_head_eyet6r.texture.transform.translate.y-=d/2;
             });
         }
 
