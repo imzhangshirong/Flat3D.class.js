@@ -335,7 +335,6 @@ var Flat3D = {
             opacity:1,
             animations: [],
             click: function (e) { },
-            texture: new Flat3D.Texture(thing),
             draw: function (getArea) {
                 var trans = new Flat3D.Transform();
                 if (this.visible && this.texture && this.texture.image && this.texture.imageCanDraw && this.stage.canvas) {
@@ -494,7 +493,9 @@ var Flat3D = {
                 //return 0;
                 if (!this.stage.canvasBuffer) return;
                 this.stage.canvasBuffer.clearRect(this.stage.rect.left, this.stage.rect.top, this.stage.rect.width, this.stage.rect.height);
+                if(!this.visible)return;
                 this.draw(true);
+                
                 var colorData = this.stage.canvasBuffer.getImageData(0, 0, this.stage.rect.width, this.stage.rect.height);
                 var x, y, area = new Flat3D.Rect.create(Math.floor(this.rect.left), Math.floor(this.rect.top), Math.floor(this.rect.right), Math.floor(this.rect.bottom)), left = -Math.floor(this.stage.rect.left), top = -Math.floor(this.stage.rect.top);
                 /*区域矩形
@@ -569,7 +570,9 @@ var Flat3D = {
                 this.animations = [];
             }
         };
+        thing.texture= new Flat3D.Texture(thing);
         return thing;
+        
     },
     Coordinate: {
         PId180: Math.PI / 180,
@@ -784,8 +787,9 @@ var Flat3D = {
                         else {
                             if (ani._runDirection == 1) {
                                 ani._runDirection = -1;
-                                ani.start();
                                 ani.tick--;
+                                ani.start();
+                            
                             }
 
                         }
@@ -797,7 +801,7 @@ var Flat3D = {
                         if (ani.tick > ani.finalTick) ani.tick = ani.finalTick;
                         if (ani.tick <= 0) {
                             ani.tick = 0;
-                            if (ani._runDirection == -1 && ani.isYoyo) {
+                            if (ani._runDirection == -1 && ani.isYoyo && ani._completeTimes >= ani.repeatTimes) {
                                 if (ani.completedCallBack) ani.completedCallBack(ani.thing);
                             }
                             ani._runDirection = 1;
