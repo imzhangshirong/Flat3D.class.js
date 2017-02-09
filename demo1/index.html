@@ -1,7 +1,9 @@
+
 <!DOCTYPE>
 <html>
 
 <head>
+    <meta charset="utf-8"/>
     <script src="../Flat3D.class.js?b=645"></script>
     <style>
             canvas{background-color:gray}
@@ -9,6 +11,7 @@
 </head>
 
 <body>
+    <div><h4 id="status">Loading</h4></div>
     <div>
         <button id="debug">DEBUG MODE</button>
         <a href="#" id="start">start</a>
@@ -83,7 +86,9 @@
             leg_right_bottom: { src: "./texture_legbr.png" },
         }
         Flat3D.Resource.loadTextureSet(Modle_Texture, function (cur, all) {
+            document.getElementById("status").innerHTML="Loading..."+cur+"/"+all;
             if (cur == all) {
+                document.getElementById("status").innerHTML="OK";
                 init();
             }
         });
