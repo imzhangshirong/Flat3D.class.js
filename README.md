@@ -1,6 +1,6 @@
 ﻿# Flat3D.class.js
 ## 一个由平面组成的3D视差舞台，全Canvas绘制，仿live2d
-
+## [演示：22娘](http://open.zhangshirong.com/Flat3D.class.js/demo1/)
 ## 类说明：
 ### 1. Flat3D.Config：配置
 - Flat3D.Config.TIMER_TICK：时钟周期，默认20
