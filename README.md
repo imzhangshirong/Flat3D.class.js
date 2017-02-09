@@ -1,6 +1,8 @@
 ﻿# Flat3D.class.js
-## 一个由平面组成的3D视差舞台，全Canvas绘制，仿live2d
+## 一个由平面组成的3D视差舞台，全Canvas绘制，仿live2d。后期针对模型考虑设计一个可视编辑器。
 ## [演示：22娘](http://open.zhangshirong.com/Flat3D.class.js/demo1/)
+
+
 ## 类说明：
 ### 1. Flat3D.Config：配置
 - Flat3D.Config.TIMER_TICK：时钟周期，默认20
@@ -38,8 +40,8 @@
 - Flat3D.Thing()
 - Flat3D.Thing.stage > Flat3D.Stage
 - Flat3D.Thing.position > Flat3D.Point
-- Flat3D.Thing.effectCallBack
-- Flat3D.Thing.effectSet
+- Flat3D.Thing.opacity > float //0~1
+- Flat3D.Thing.visible > boolean
 - Flat3D.Thing.rect > Flat3D.Rect
 - Flat3D.Thing.animations > Flat3D.Animation
 - Flat3D.Thing.click > function(event){}
@@ -165,3 +167,12 @@
 - Flat3D.Ease.Elastic.easeIn/easeOut/easeInOut(t, b, c, d)
 - Flat3D.Ease.Back.easeIn/easeOut/easeInOut(t, b, c, d)
 - Flat3D.Ease.Bounce.easeIn/easeOut/easeInOut(t, b, c, d)
+
+### 19. Flat3D.InfluenceSet：影响集类
+- Flat3D.InfluenceSet(parentThing, effectSourceKey)
+- Flat3D.InfluenceSet.thing > Flat3D.Thing
+- Flat3D.InfluenceSet.lastData > {before:any, after:any}
+- Flat3D.InfluenceSet.listeners > [] > function(thing,before,after){}
+- Flat3D.InfluenceSet.addListener(listener)
+- Flat3D.InfluenceSet.removeListener(listener)
+- Flat3D.InfluenceSet.notify(before, after)

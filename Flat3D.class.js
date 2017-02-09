@@ -841,7 +841,7 @@ var Flat3D = {
         var influenceSet = {
             listeners: [],
             thing: parentThing,
-            lastDate: {
+            lastData: {
                 before: value[key], after: value[key]
             },
             removeListener: function (listener) {
@@ -851,7 +851,7 @@ var Flat3D = {
                 }
             },
             notify: function (before, after) {
-                this.lastDate = { before: before, after: after };
+                this.lastData = { before: before, after: after };
                 for (var a = 0; a < this.listeners.length; a++) {
                     if (this.listeners[a]) {
                         this.listeners[a](parentThing, before, after);
@@ -868,7 +868,7 @@ var Flat3D = {
             }
             this.listeners = newListeners;
             this.listeners.push(listener);
-            listener(parentThing, this.lastDate.before, this.lastDate.after);
+            listener(parentThing, this.lastData.before, this.lastData.after);
             return listener;
         };
         var newSpace=value[key];
@@ -882,7 +882,6 @@ var Flat3D = {
         });
         return influenceSet;
     },
-    Path: {},
     Vector: function (_x, _y, _z) {
         return {
             x: _x,
